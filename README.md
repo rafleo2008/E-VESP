@@ -6,7 +6,7 @@ This first approach will consider only 1 line
 
 ## Model inputs
 ### Initial setup
-
+1. Basic conditions
 ### Vehicle features
 1. Bus models .csv file with example bus units
 2. Bus compositions
@@ -16,5 +16,6 @@ This first approach will consider only 1 line
 ### Line 
 1. Branches
 2. Frequency per branch and initial point
-
+### Controller
+1. Controller criteria and settings
 
