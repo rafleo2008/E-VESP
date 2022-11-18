@@ -12,7 +12,7 @@ This first approach will consider only 1 line
 2. Bus compositions
 3. Bus fleet (Further versions will use 
 ### Network
-1. Network shapefile
+1. Network shapefile (please provide a projected (meters) shapefile.
 ### Line 
 1. Branches
 2. Frequency per branch and initial point
