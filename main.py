@@ -11,34 +11,45 @@ import pandas as pd
 import geopandas as gpd
 import time
 from datetime import timedelta
+from pathlib import Path
 
-## Main functions
+
+#### Main paths and directions
+
+timeTablesPath = Path("Intermediate/timetables.csv")
+
+#### Main functions
+
 def calculateTimeTables(route, RSP, REP, STime, ETime, Frequency):
+    
+    print("Calculating departure times")
     timeTable = pd.DataFrame(columns = ["Route","RSP","REP","DepTime"])
-    print("Running calculate Time Tables")
+    
     intervalMin = timedelta(minutes = (60/Frequency))
+
     depTime = STime
-    print(STime)
+
     
     while(depTime <= ETime):
         line = pd.DataFrame([[route, RSP, REP, depTime]],
                             columns = ["Route","RSP","REP","DepTime"])
-        print(line)
+        #print(line)
         depTime = depTime+intervalMin
         timeTable = pd.concat([timeTable, line])
-        #timeTable = timeTable.append(line)
     return timeTable
     
 
-## Load timetable example
+#### Main Code
+
+#Load timetable example
 
 timeTable = pd.read_csv("Inputs\Frequencies_csv.csv",
                         parse_dates = ['HourFrom', "HourTo"] )
 
-## 
-
 
 ##
+compiledTimeTable = pd.DataFrame(columns = ["Route","RSP","REP","DepTime"])
+
 for row in timeTable.iterrows():
     curRoute = row[1].Route
     curRSP = row[1].Origin
@@ -49,10 +60,16 @@ for row in timeTable.iterrows():
     
     myTimeTable = calculateTimeTables(curRoute, curRSP, curREP, curSTime,
                         curETime, curFreq)
+    print(myTimeTable)
+    compiledTimeTable = pd.concat([compiledTimeTable, myTimeTable])
+
+
+print(len(compiledTimeTable))
        
-myTimeTable.to_csv("Intermediate\timetables.csv")    
+compiledTimeTable.to_csv(timeTablesPath)    
     
-    
+
+
 
     
 
