@@ -63,8 +63,8 @@ for row in timeTable.iterrows():
     print(myTimeTable)
     compiledTimeTable = pd.concat([compiledTimeTable, myTimeTable])
 
+#compiledTimeTable.set_index(list(range(len(compiledTimeTable))), inplace = True)
 
-print(len(compiledTimeTable))
        
 compiledTimeTable.to_csv(timeTablesPath)    
     
