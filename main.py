@@ -60,12 +60,13 @@ for row in timeTable.iterrows():
     
     myTimeTable = calculateTimeTables(curRoute, curRSP, curREP, curSTime,
                         curETime, curFreq)
-    print(myTimeTable)
+    
     compiledTimeTable = pd.concat([compiledTimeTable, myTimeTable])
 
+tripList = list(range(len(compiledTimeTable))) 
 
-print(len(compiledTimeTable))
-       
+compiledTimeTable.set_index(pd.Index(tripList), inplace = True)
+print(compiledTimeTable)     
 compiledTimeTable.to_csv(timeTablesPath)    
     
 
