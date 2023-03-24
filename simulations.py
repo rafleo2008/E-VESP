@@ -38,9 +38,12 @@ print(o.bus1.consAC)
 
 simStep = startTime
 
+o.bus1.setInitialBattery(1.5)
+
 
 while (simStep <= endTime):
     if simStep.minute%15 == 0:      
+        
         print(simStep)
         print(o.bus1.soc)
         print(o.bus1.odo)
@@ -48,7 +51,7 @@ while (simStep <= endTime):
     #print(simStep)
     minuteStep = simResolution.total_seconds()/60
     #print(minuteStep)
-    o.bus1.runStep(minuteStep, 30)
+    o.bus1.runStep(minuteStep, 15)
     #print(o.bus1.odo)
     ## Visualization routine
     
