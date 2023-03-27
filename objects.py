@@ -10,11 +10,9 @@ from datetime import timedelta
 
 ## Objects definition
 
-
 ## ebus
 
 
-## dispatcher
 
 class eBus:
     ## Initial default values
@@ -56,6 +54,8 @@ class eBus:
 
     def assignStatus(self, status):
         self.status = status
+        
+
     def runStep(self, step, speed):
         currentStatus = self.status
         '''
@@ -76,10 +76,45 @@ class eBus:
         print("Bus status : {}".format(self.status))
         #print("SOC = ")
         
+## dispatcher        
+
+class PIR:
+    pirs = []
+    def __init__(self, 
+                 place : str,
+                 routes: [],
+                 depots: [],
+                 lookaheadtime = int):
+        self.place = place
+        self.routes = routes
+        self.depots = depots
+        self.lookaheadtime = lookaheadtime
+        
+        # Actions
+        PIR.pirs.append(self)
+    def runStep(self, step):
+        '''
+        Check all timesteps (at minute) and check if theres a departure time
+        If theres a departure time, assign ebus from list
+
+        HOW TO ASSIGN EBUS        
+            Define min. battery to operate (trip + empty time)
+            Filter available vehicles
+            Check if the available bus can handle it in the DSoC
+            IF not, send bus to bus depot
+            IF yes, consider bus bundle to assing trip
+            Assign trip based on the best conditions
+            
+            All this process must be documented in a log file
+            
+        '''
+        
         
         
 
-# Object example
+        
+
+# Bus Object example
 
 bus1 = eBus('Sunwin','EVB8m',2023,250,True, 0.9,0.75, 1,1,0)
 bus2 = eBus('Yutong','EVB8m',2023,250,True, 0.9,0.75, 1,1,0)
@@ -96,7 +131,12 @@ for item in eBus.fleet:
 #bus1.runStep(1, 30)
 
 
-print(bus1.odo)
+#print(bus1.odo)
+
+# PIR Object example
+
+pir1 = PIR("South", ['A1'],['Depot1'], 60)
+
 
     
         
