@@ -106,7 +106,15 @@ class PIR:
             Assign trip based on the best conditions
             
             All this process must be documented in a log file
-            
+        INPUTS:
+        1. List of Ebus with their status and localization (E-bus method?)(requirefleetstatus)
+        2. (ID/Status/location/SoC)
+        3. Filter:
+            1. Status:Available in PIR
+            2. Location:Selected PIR(from object)(after 15min waiting (error margin)
+            3. Select bus with less waiting time
+            SELECT BUS
+            1. Assing bus to a specific table
         '''
         
         
