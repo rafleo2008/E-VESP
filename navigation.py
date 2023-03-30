@@ -23,3 +23,27 @@ print(line.head())
 residuo = 0 
 
 
+
+routeLength = line.geometry.iloc[0].length
+print("Areas")
+print(routeLength)
+
+
+mycoords = list(line.iloc[0].coords)
+
+
+
+points = gpd.GeoSeries()
+
+for distance_along in np.arange(0, routeLength, 100):
+    point = line.interpolate(distance_along)
+    points = points.append(point)
+    #print(point)
+    #coords.append((point.x[0], point.y[0]))
+#coords = tuple(coords)
+print("Checkintermediatecoords")
+#print(coords)
+
+points = gpd.GeoSeries(points)
+points.explore().save("Example2.html")
+
