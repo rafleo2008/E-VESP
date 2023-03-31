@@ -34,16 +34,25 @@ mycoords = list(line.iloc[0].coords)
 
 
 points = gpd.GeoSeries()
+distances = []
 
 for distance_along in np.arange(0, routeLength, 100):
     point = line.interpolate(distance_along)
+    distance = float(line.project(point))
     points = points.append(point)
-    #print(point)
-    #coords.append((point.x[0], point.y[0]))
-#coords = tuple(coords)
+    distances.append(distance)
+    
+    
+
 print("Checkintermediatecoords")
 #print(coords)
 
-points = gpd.GeoSeries(points)
-points.explore().save("Example2.html")
+
+points.crs = 'EPSG:3116'
+
+gdfpoints = gpd.GeoDataFrame(geometry = points)
+gdfpoints["Distance_along"] = distances
+gdfpoints.explore().save("Example2.html")
+#print(points)
+print(distances)
 
