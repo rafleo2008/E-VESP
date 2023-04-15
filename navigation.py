@@ -36,9 +36,9 @@ mycoords = list(line.iloc[0].coords)
 points = gpd.GeoSeries()
 distances = []
 
-for distance_along in np.arange(0, routeLength, 100):
+for distance_along in np.arange(0, routeLength, int(100)):
     point = line.interpolate(distance_along)
-    distance = float(line.project(point))
+    distance = int(line.project(point))
     points = points.append(point)
     distances.append(distance)
     
@@ -52,6 +52,8 @@ points.crs = 'EPSG:3116'
 
 gdfpoints = gpd.GeoDataFrame(geometry = points)
 gdfpoints["Distance_along"] = distances
+gdfpoints["Route"] = "Route AA"
+gdfpoints["Direction"] = "North - South" 
 gdfpoints.explore().save("Example2.html")
 #print(points)
 print(distances)
