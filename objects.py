@@ -21,9 +21,9 @@ class eBus:
     def __init__(self, 
                  brand: str,
                  model: str,
-                 year: int,
-                 capacity: float,
-                 ac: bool,
+                 year: int, #Delete?
+                 capacity: float, 
+                 ac: bool, # change name
                  consAC: float,
                  consNoAC: float,
                  soc: float,
@@ -57,8 +57,13 @@ class eBus:
         
 
     def runStep(self, step, speed):
+                
         currentStatus = self.status
+        energy = step*speed
+        #print(energy)
+        
         '''
+        
         Bus activity based in the status:
         Status
         - Parked = Parked in the 
@@ -116,13 +121,57 @@ class PIR:
             SELECT BUS
             1. Assing bus to a specific table
         '''
+## Bus depot
+class BusDepot:
+    def __init__(self,
+                 name, 
+                 location_name,
+                 capacity_bus,
+                 capacity_chargers):
+        self.name = name
+        self.location_name = location_name
+        self.capacity_bus = capacity_bus
+        self.capacity_chargers = capacity_chargers
+        self.chargers = []
+        self.bus_fleet = []
+            
+    def add_charger(self, charger):
+        # Add chargers until reach max amount of chargers
+        if(len(self.chargers)< self.capacity_chargers):
+            self.chargers.append(charger)
+            log = "Charged added successfully"
+        else:
+            log = "Total amount of chargers reached, charger not added"
+        print(log)
         
+    def add_bus(self, eBus):
+        # Add buses until reach max amount of ebus
+        if(len(self.bus_fleet)<self.capacity_bus):
+            self.bus_fleet.append(eBus)
+            log = "EBus added successfully"
+        else:
+            log = "Total amount of EBus reached, EBus not added"
+        print(log)            
+    
         
-        
-
-        
+## Chargers
+class Charger:
+    
+    def __init__(self,
+                 brand,
+                 model,
+                 n_dispensers,
+                 total_power,
+                 single_power,
+                double_power):
+        self.brand = brand
+        self.model = model
+        self.n_dispensers = n_dispensers
+    
 
 # Bus Object example
+
+
 
 bus1 = eBus('Sunwin','EVB8m',2023,250,True, 0.9,0.75, 1,1,0)
 bus2 = eBus('Yutong','EVB8m',2023,250,True, 0.9,0.75, 1,1,0)
