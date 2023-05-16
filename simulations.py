@@ -55,14 +55,16 @@ def runModel(startTime, endTime, simResolution, reportFreq):
         
         # Cannot use speed, tag speed using controller
         # This should be inside a batch to run all busses at once
-        o.bus1.runStep(minuteStep, 10)
+        for bus in fleet:
+            bus.runStep(minuteStep,10)
+
         NorthPIR.runStep(simStep ,m.myTimeTable)
         ## Report 
         if (counter%reportFreq == 0):
             # This could be also a function
             print(simStep)
-            print(o.bus1.soc)
-            print(o.bus1.odo)
+            #print(o.bus1.soc)
+            #print(o.bus1.odo)
         ##
         counter = counter + 1
         simStep = simStep + simResolution
@@ -113,28 +115,32 @@ start_min_step = dateToTimeStep(start_day, start_hour, start_minute)
 end_min_step = dateToTimeStep (end_day, end_hour, end_minute)
 
 
+
 print("Simulation start at {} timesteps".format(start_min_step))
 print("Simulation end at {} timesteps".format(end_min_step))
 
 ### End new simulation step procedure
 
-##
+##  PIR Definitions
+
 NorthPIR = o.PIR("North", "A1", "Depot1")
 SouthPIR = o.PIR("South", "A1", "Depot1")
-## Bus Fleet (Specific size)
-bus_fleet = []
-for i in (range(50)):
-    print(i)
-    bus = o.eBus('Sunwin','EVB8m',2023,250,True, 0.9,0.75, 1,1,0)
-    '''
-    bus_fleet = bus_fleet.append(bus)
-    '''
 
-#bus1 = eBus('Sunwin','EVB8m',2023,250,True, 0.9,0.75, 1,1,0)
+## Create Bus Fleet (Specific size)
+## Further development will include a default bus fleet calculation
 
-o.bus1.setInitialBattery(1.5)
+n = 38 # further input variable
 
+fleet = []
 
+for i in range(n):
+    bus = o.eBus('Sunwin','EVB8m',2023,250, 0.9,0.75, 1,0, 85, 0)
+    fleet.append(bus)
+    
+for bus in fleet:
+    
+    print(bus.brand)
+   
 ## Run Model
 
 runModel(start_min_step, end_min_step, min_time_step, 48)
