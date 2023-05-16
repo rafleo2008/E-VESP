@@ -45,10 +45,10 @@ def runModel(startTime, endTime, simResolution, reportFreq):
     
     simStep = startTime
     counter = 0
-    minuteStep = simResolution.total_seconds()/60
+    minuteStep = simResolution
+    #minuteStep = simResolution.total_seconds()/60
     
     ## Initialize vehicles, PIR and controllers
-    
     
     while(simStep <=endTime):
         ## All objects actions (busses, controllers, buscontroller)
@@ -56,6 +56,7 @@ def runModel(startTime, endTime, simResolution, reportFreq):
         # Cannot use speed, tag speed using controller
         # This should be inside a batch to run all busses at once
         o.bus1.runStep(minuteStep, 10)
+        NorthPIR.runStep(simStep ,m.myTimeTable)
         ## Report 
         if (counter%reportFreq == 0):
             # This could be also a function
@@ -65,7 +66,22 @@ def runModel(startTime, endTime, simResolution, reportFreq):
         ##
         counter = counter + 1
         simStep = simStep + simResolution
-        
+
+def dateToTimeStep(day, hour, minute):
+    ## Convert day, hour and minute to timesteps
+    timeStep = day*(60*24) + hour*60 + minute
+    return timeStep        
+def timeStepToDate(timeStep):
+    days = timeStep//(60*24)
+    rem = timeStep - (days*1440)
+    hours = rem//60
+    rem = (rem - (hours*60))
+    minutes = rem
+    print("{0} steps are {1} days, {2} hours and {3} minutes".format(timeStep, days, hours, minutes))
+    return days, hours, minutes
+    #hours = (timeSteps%(60*24))/24
+    #minute = ((timeSteps%(60*24))/24)
+    
                
 ## Import main libraries
 
@@ -80,34 +96,50 @@ import objects as o
 ## Base parameters, pending to convert to todays parameters
 ## start and end hour should be user inputs
 
-startYear =2023
-startMonth = 3
-startDay = 20
-startHour= 5
-endHour = 0
-startTime = dt(year = startYear,
-               month = startMonth,
-               day = startDay,
-               hour = startHour)
-endTime = dt(year = startYear,
-             month = startMonth,
-             day = startDay+1,
-             hour = endHour)
 
-simResolution = timedelta(minutes = 5)
+### Start new simulation step procedure
+
+start_day = 0
+start_hour = 0
+start_minute = 0
+
+end_day = 3
+end_hour = 0
+end_minute = 0
+
+min_time_step = 5
+
+start_min_step = dateToTimeStep(start_day, start_hour, start_minute)
+end_min_step = dateToTimeStep (end_day, end_hour, end_minute)
 
 
-## Sim Time
-print(o.bus1.model)
-print(o.bus1.consAC)
+print("Simulation start at {} timesteps".format(start_min_step))
+print("Simulation end at {} timesteps".format(end_min_step))
 
-simStep = startTime
+### End new simulation step procedure
+
+##
+NorthPIR = o.PIR("North", "A1", "Depot1")
+SouthPIR = o.PIR("South", "A1", "Depot1")
+## Bus Fleet (Specific size)
+bus_fleet = []
+for i in (range(50)):
+    print(i)
+    bus = o.eBus('Sunwin','EVB8m',2023,250,True, 0.9,0.75, 1,1,0)
+    '''
+    bus_fleet = bus_fleet.append(bus)
+    '''
+
+#bus1 = eBus('Sunwin','EVB8m',2023,250,True, 0.9,0.75, 1,1,0)
 
 o.bus1.setInitialBattery(1.5)
 
 
 ## Run Model
 
-runModel(startTime, endTime, simResolution, 6)
+runModel(start_min_step, end_min_step, min_time_step, 48)
 
-
+'''
+for i in (range(50)):
+    print(bus_fleet.brand)
+'''
