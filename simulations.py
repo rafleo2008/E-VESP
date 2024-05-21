@@ -10,7 +10,7 @@ Created on Thu Mar 23 19:29:26 2023
 '''
 MODEL DESCRIPTION
 
-This model aims to assess, at strategic level, the compatibility of a bus 
+This model aims to assess the compatibility of a bus 
 operation system with specific e-bus model.
 
 The application of this model will expand the model potential, with the ability
@@ -40,9 +40,9 @@ EBus
     1.5. If going to bus depot: Navigate and discharge.
 '''
 ## Functions
-def runModel(startTime, endTime, simResolution, reportFreq):
+def runModel(startTime, endTime, simResolution, reportFreq, fleet):
     ## Initialize time control variables
-    
+    print("Simulation run starts")
     simStep = startTime
     counter = 0
     minuteStep = simResolution
@@ -56,9 +56,12 @@ def runModel(startTime, endTime, simResolution, reportFreq):
         # Cannot use speed, tag speed using controller
         # This should be inside a batch to run all busses at once
         for bus in fleet:
+            bus.assignStatus("Charging")
+        for bus in fleet:
+            print(bus.brand)
             bus.runStep(minuteStep,10)
 
-        NorthPIR.runStep(simStep ,m.myTimeTable)
+        #NorthPIR.runStep(simStep,m.myTimeTable)
         ## Report 
         if (counter%reportFreq == 0):
             # This could be also a function
@@ -129,7 +132,7 @@ SouthPIR = o.PIR("South", "A1", "Depot1")
 ## Create Bus Fleet (Specific size)
 ## Further development will include a default bus fleet calculation
 
-n = 38 # further input variable
+n = 10 # further input variable
 
 fleet = []
 
@@ -143,9 +146,9 @@ for bus in fleet:
    
 ## Run Model
 
-runModel(start_min_step, end_min_step, min_time_step, 48)
+runModel(start_min_step, end_min_step, min_time_step, 96, fleet)
 
 '''
-for i in (range(50)):
+for i in (range(fleet)):
     print(bus_fleet.brand)
 '''

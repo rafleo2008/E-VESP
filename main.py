@@ -2,8 +2,14 @@
 """
 Created on Thu Nov 17 21:03:05 2022
 @author: Rafael Munoz
+
+
 """
-#
+## ------------------------------------------------------------------------- ##
+## Code description
+
+
+
 
 ## Import required modules
 
@@ -14,11 +20,19 @@ from datetime import timedelta
 from pathlib import Path
 
 
-#### Main paths and directions
+#### Main paths
 
-timeTablesPath = Path("Intermediate/timetables.csv")
+routeFrequPath = Path("Inputs/Frequencies_csv_BAQ.csv")
+timeTablesPath = Path("Intermediate/timetables_BAQ.csv")
 
-#### Main functions
+#### Main variables
+dateFormat = "&H:$M"
+
+# Define the custom date parser function
+dateParser = lambda x: pd.to_datetime(x, format=dateFormat)
+
+
+#### Main functions (This should be moved away, this is the compile code)
 
 def calculateTimeTables(route, RSP, REP, STime, ETime, Frequency):
     
@@ -43,11 +57,13 @@ def calculateTimeTables(route, RSP, REP, STime, ETime, Frequency):
 
 #Load timetable example
 
-timeTable = pd.read_csv("Inputs\Frequencies_csv.csv",
-                        parse_dates = ['HourFrom', "HourTo"] )
+timeTable = pd.read_csv(routeFrequPath, 
+                        parse_dates = ['HourFrom', "HourTo"],
+                        #date_parser=dateParser
+                        )
 
 
-##
+## Create an empty DF to store new scheduling
 compiledTimeTable = pd.DataFrame(columns = ["Route","RSP","REP","DepTime"])
 
 for row in timeTable.iterrows():
@@ -68,8 +84,6 @@ for row in timeTable.iterrows():
        
 compiledTimeTable.to_csv(timeTablesPath)    
     
-
-
 
     
 
