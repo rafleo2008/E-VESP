@@ -23,12 +23,14 @@ class eBus:
                  model: str,
                  year: int, #Delete?
                  capacity: float, 
-                 ac: bool, # change name
+                 acON: bool, 
                  consAC: float,
                  consNoAC: float,
                  soc: float,
                  socpe: float,
-                 odo: float):
+                 odo: float,
+                 busID: str
+                 ):
         
         ## Assign self initial parameters
         
@@ -36,11 +38,13 @@ class eBus:
         self.model = model
         self.year = year
         self.capacity = capacity
-        self.ac = ac
+        self.ac = acON
         self.consAC = consAC
         self.consNoAC = consNoAC
-        self.odo = odo
         self.soc = capacity
+        self.socpe = socpe
+        self.odo = odo
+        self.busId = busID
         
         ## Actions
         eBus.fleet.append(self)
@@ -55,7 +59,8 @@ class eBus:
     def assignStatus(self, status):
         self.status = status
         
-
+    def setBusId (self, identifier):
+        self.identifier = identifier
     def runStep(self, step, speed):
                 
         currentStatus = self.status
@@ -66,12 +71,18 @@ class eBus:
         
         Bus activity based in the status:
         Status
-        - Parked = Parked in the 
+        - Parked = No displacement, no consumption, no charging, ready to be assigned
+        - Charging = No displacement, no consumption, charging
+        - Charged = ready for a new service
+        - Empty = Circulating out of the route, discharging
+        - Route = Circulating in route, discharging
         Check status
         
-        If charging, add current to battery until reach capacity
-        If in transit, discharge at specific rate and displace to a new point in the route
         '''
+        if (self.status == "Parked"):
+            print("Bus parqueado")
+            
+        
         
         
         self.odo = self.odo + speed*(step/60)
@@ -173,9 +184,9 @@ class Charger:
 
 
 
-bus1 = eBus('Sunwin','EVB8m',2023,250,True, 0.9,0.75, 1,1,0)
-bus2 = eBus('Yutong','EVB8m',2023,250,True, 0.9,0.75, 1,1,0)
-bus3 = eBus('Zhongtong','EVB8m',2023,250,True, 0.9,0.75, 1,1,0)
+bus1 = eBus('Sunwin','EVB8m',2023,250,True, 0.9,0.75, 1,1,0, "Bus1")
+bus2 = eBus('Yutong','EVB8m',2023,250,True, 0.9,0.75, 1,1,0, "Bus2")
+bus3 = eBus('Zhongtong','EVB8m',2023,250,True, 0.9,0.75, 1,1,0, "Bus3")
 
 for item in eBus.fleet:
     item.assignStatus("Parked")
