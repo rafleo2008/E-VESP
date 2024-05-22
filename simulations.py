@@ -49,23 +49,32 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet):
     #minuteStep = simResolution.total_seconds()/60
     
     ## Initialize vehicles, PIR and controllers
+    for bus in fleet:
+        bus.assignStatus("Parked")
     
     while(simStep <=endTime):
+        ## Time loop, here, the model will run in each step
+        
+        ## Status tests
+        fleet[3].assignStatus("Charging")
+        fleet[5].assignStatus("Navigating")
+        
         ## All objects actions (busses, controllers, buscontroller)
         
         # Cannot use speed, tag speed using controller
         # This should be inside a batch to run all busses at once
+
         for bus in fleet:
-            bus.assignStatus("Charging")
-        for bus in fleet:
-            print(bus.brand)
+            #print(bus.status)
             bus.runStep(minuteStep,10)
 
         #NorthPIR.runStep(simStep,m.myTimeTable)
         ## Report 
         if (counter%reportFreq == 0):
             # This could be also a function
-            print(simStep)
+            print("Reporte del paso " + str(simStep))
+            for bus in fleet:
+                print(bus.busId + " - Estado : "+ bus.status)
             #print(o.bus1.soc)
             #print(o.bus1.odo)
         ##
@@ -136,19 +145,36 @@ n = 10 # further input variable
 
 fleet = []
 
+
 for i in range(n):
-    bus = o.eBus('Sunwin','EVB8m',2023,250, 0.9,0.75, 1,0, 85, 0)
+    busId = f"Ebus_E{i:02d}"
+    
+    print("Creando bus " + busId)
+    bus = o.eBus('Sunwin', 
+                 'EVB8m',
+                 2023,
+                 250,
+                 True, 
+                 0.9,
+                 0.75, 
+                 1, 
+                 0.85, 
+                 0,
+                 busId)
+    
     fleet.append(bus)
     
 for bus in fleet:
     
-    print(bus.brand)
+    print(bus.busId)
    
 ## Run Model
 
-runModel(start_min_step, end_min_step, min_time_step, 96, fleet)
+runModel(start_min_step, end_min_step, min_time_step, 12, fleet)
 
 '''
 for i in (range(fleet)):
     print(bus_fleet.brand)
 '''
+
+
