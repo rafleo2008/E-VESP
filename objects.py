@@ -58,6 +58,18 @@ class eBus:
 
     def assignStatus(self, status):
         self.status = status
+    def innitializeRoute(self):
+        ## Prueba con ruta standar
+        freq = 5 # 5 minutos
+        routeLen = 22
+        routeSpe = 17
+        cycleTime = (routeLen/routeSpe)*60
+        routeName = "Imaginary route"
+        self.routeName = routeName
+        self.routeLengt = routeLen 
+        self.routePosit = 0
+        self.routeSpeed = routeSpe
+        
         
     def setBusId (self, identifier):
         self.identifier = identifier
@@ -66,7 +78,7 @@ class eBus:
         currentStatus = self.status
         energy = step*speed
         #print(energy)
-        
+                              
         '''
         
         Bus activity based in the status:
