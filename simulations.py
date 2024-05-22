@@ -45,6 +45,22 @@ EBus
 '''
 ## Functions
 def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable):
+    '''
+    This function run the model from start time to end time, at each sim resolution,
+    reports every report freq (steps) and use the fleet and timetable to interact
+    
+    Parameters
+    startTime: int
+    endTime: int
+    simResolution: int
+    reportFreq: int
+    fleet: list containing bus elements
+    timeTable: dataframe
+    ## To be implemented 
+    line(s): geodataframe
+    
+     
+    '''
     ## Initialize time control variables
     print("Simulation run starts")
     simStep = startTime
@@ -91,10 +107,13 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable):
         
         departure = myTimeTable.iloc[row]
         #print(departure)
+        
+        ## This will be depreciated once we implement a search among availabe vehicles sorted by arrival time
 
         if(simStep == departure.TimeStep):
             print("Departure simstep " + str(simStep))
             fleet[i].assignStatus("InRoute")
+            fleet[i].innitializeRoute()
             row = row + 1
             i = i + 1
             
@@ -166,7 +185,7 @@ SouthPIR = o.PIR("South", "A1", "Depot1")
 ## Create Bus Fleet (Specific size)
 ## Further development will include a default bus fleet calculation
 
-n = 34 # further input variable
+n = 50 # further input variable
 
 fleet = []
 
