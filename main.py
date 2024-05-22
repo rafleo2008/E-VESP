@@ -22,8 +22,8 @@ from pathlib import Path
 
 #### Main paths
 
-routeFrequPath = Path("Inputs/Frequencies_csv_BAQ.csv")
-timeTablesPath = Path("Intermediate/timetables_BAQ.csv")
+routeFrequPath = Path("Inputs/Frequencies_csv.csv")
+timeTablesPath = Path("Intermediate/timetables.csv")
 
 #### Main variables
 dateFormat = "&H:$M"
