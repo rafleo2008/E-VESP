@@ -35,27 +35,23 @@ EBus
     1.1. If parked: Do nothing
     1.2. If charging: Keep position and Use charging curve to update 
         Soc and Battery
-    1.3. If going to PIR: Navigate from Bus Depot to PIR and discharge
-    1.4. If Navigating: Navigate along the route and discharge, Update SOC, Calculate remaining Km.
-    1.5. If going to bus depot: Navigate and discharge.
+    1.3. If Charged, Keep position and no charge
+    1.4. If going to PIR: Navigate from Bus Depot to PIR and discharge
+    1.5. If InRoute: Navigate along the route and discharge, Update SOC, Calculate remaining Km.
+    1.6. If going to bus depot: Navigate and discharge.
     
-        Bus activity based in the status:
-        Status
-        - Parked = No displacement, no consumption, no charging, ready to be assigned
-        - Charging = No displacement, no consumption, charging
-        - Charged = ready for a new service
-        - Empty = Circulating out of the route, discharging
-        - Route = Circulating in route, discharging
-        Check status
+
     
 '''
 ## Functions
-def runModel(startTime, endTime, simResolution, reportFreq, fleet):
+def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable):
     ## Initialize time control variables
     print("Simulation run starts")
     simStep = startTime
     counter = 0
     minuteStep = simResolution
+    row = 0
+    i = 0
     #minuteStep = simResolution.total_seconds()/60
     
     ## Initialize vehicles, PIR and controllers
@@ -65,9 +61,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet):
     while(simStep <=endTime):
         ## Time loop, here, the model will run in each step
         
-        ## Status tests
-        fleet[3].assignStatus("Charging")
-        fleet[5].assignStatus("Navigating")
+
         
         ## All objects actions (busses, controllers, buscontroller)
         
@@ -76,7 +70,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet):
 
         for bus in fleet:
             #print(bus.status)
-            bus.runStep(minuteStep,10)
+            bus.runStep(minuteStep,60)
 
         #NorthPIR.runStep(simStep,m.myTimeTable)
         ## Report 
@@ -84,10 +78,29 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet):
             # This could be also a function
             print("Reporte del paso " + str(simStep))
             for bus in fleet:
-                print(bus.busId + " - Estado : "+ bus.status)
-            #print(o.bus1.soc)
-            #print(o.bus1.odo)
-        ##
+                print(bus.busId + " - Estado : "+ bus.status + "SoC: " + str(bus.soc) + " - Odometer: " + str(bus.odo))
+        
+                
+        ## Simulate in-route bus at step 300
+        '''
+        if (simStep == 300):
+            ## Status tests
+            fleet[5].assignStatus("InRoute")
+        '''
+        
+        
+        departure = myTimeTable.iloc[row]
+        #print(departure)
+
+        if(simStep == departure.TimeStep):
+            print("Departure simstep " + str(simStep))
+            fleet[i].assignStatus("InRoute")
+            row = row + 1
+            i = i + 1
+            
+        
+            
+        
         counter = counter + 1
         simStep = simStep + simResolution
 
@@ -111,9 +124,11 @@ def timeStepToDate(timeStep):
 
 import main as m
 import time
-from datetime import datetime as dt
+from datetime import datetime
+
 from datetime import timedelta
 import objects as o
+import pandas as pd
 
 ## Default input parameters
 
@@ -127,11 +142,11 @@ start_day = 0
 start_hour = 0
 start_minute = 0
 
-end_day = 3
+end_day = 1
 end_hour = 0
 end_minute = 0
 
-min_time_step = 5
+min_time_step = 1
 
 start_min_step = dateToTimeStep(start_day, start_hour, start_minute)
 end_min_step = dateToTimeStep (end_day, end_hour, end_minute)
@@ -151,7 +166,7 @@ SouthPIR = o.PIR("South", "A1", "Depot1")
 ## Create Bus Fleet (Specific size)
 ## Further development will include a default bus fleet calculation
 
-n = 10 # further input variable
+n = 34 # further input variable
 
 fleet = []
 
@@ -177,14 +192,29 @@ for i in range(n):
 for bus in fleet:
     
     print(bus.busId)
+
+## Open timetable
+
+ 
+# Enviar esto a main
+myTimeTable = m.compiledTimeTable
+myTimeTable["DepTime"] = pd.to_datetime(myTimeTable["DepTime"])
+#reference_time = pd.Timestamp('2024-05-21 00:00:00')
+
+today = pd.Timestamp(datetime.now().date())
+reference_time = today
+
+myTimeTable["TimeStep"] = (myTimeTable["DepTime"] - reference_time).dt.total_seconds() // 60
+
+
+print(myTimeTable)
+
+
    
 ## Run Model
 
-runModel(start_min_step, end_min_step, min_time_step, 12, fleet)
+runModel(start_min_step, end_min_step, min_time_step, 60, fleet, myTimeTable)
 
-'''
-for i in (range(fleet)):
-    print(bus_fleet.brand)
-'''
+
 
 

@@ -77,17 +77,35 @@ class eBus:
         - GoingPIR = Circulating out of the route, discharging
         - GoingBD  = Circulating out of the route, discharging
         - InRoute = Circulating in route, discharging
+        - Hold = Stopped in bus depot discharged
         Check status
         
         '''
-        if (self.status == "Parked"):
-            print(self.busId + ": - Bus parqueado")
+        if (self.status == "InRoute"):
+            # In route should 1. Check SoC
+            # Adjust SoC
+            # Update position
+            # Stop if SoC <+ 10%
+            #print(self.busId + self.status)
+            self.soc = self.soc - (speed*(step/60))*self.consNoAC
+            self.odo = self.odo + speed*(step/60)
+            if( self.soc <= self.capacity*0.1): # Stop if battery is below 10%
+                self.status = "Charging"
+        elif(self.status == "Charging"):
+            maxCharge = self.capacity
+            charge = self.soc + (120*(step/60)) ##120kwh power, change to a variable soon (from charger)
+            
+            self.soc = min(maxCharge, charge)
+            if (self.soc == maxCharge):
+                self.status = "Charged"
+            
+
             
         
         
         
-        self.odo = self.odo + speed*(step/60)
-        self.soc = self.soc - (speed*(step/60))*self.consAC
+
+        
     
     def printStatus(self):
         print("Bus status : {}".format(self.status))
