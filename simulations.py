@@ -38,6 +38,16 @@ EBus
     1.3. If going to PIR: Navigate from Bus Depot to PIR and discharge
     1.4. If Navigating: Navigate along the route and discharge, Update SOC, Calculate remaining Km.
     1.5. If going to bus depot: Navigate and discharge.
+    
+        Bus activity based in the status:
+        Status
+        - Parked = No displacement, no consumption, no charging, ready to be assigned
+        - Charging = No displacement, no consumption, charging
+        - Charged = ready for a new service
+        - Empty = Circulating out of the route, discharging
+        - Route = Circulating in route, discharging
+        Check status
+    
 '''
 ## Functions
 def runModel(startTime, endTime, simResolution, reportFreq, fleet):

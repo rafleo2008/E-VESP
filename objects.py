@@ -29,7 +29,7 @@ class eBus:
                  soc: float,
                  socpe: float,
                  odo: float,
-                 busID: str
+                 busId: str
                  ):
         
         ## Assign self initial parameters
@@ -44,7 +44,7 @@ class eBus:
         self.soc = capacity
         self.socpe = socpe
         self.odo = odo
-        self.busId = busID
+        self.busId = busId
         
         ## Actions
         eBus.fleet.append(self)
@@ -74,13 +74,14 @@ class eBus:
         - Parked = No displacement, no consumption, no charging, ready to be assigned
         - Charging = No displacement, no consumption, charging
         - Charged = ready for a new service
-        - Empty = Circulating out of the route, discharging
-        - Route = Circulating in route, discharging
+        - GoingPIR = Circulating out of the route, discharging
+        - GoingBD  = Circulating out of the route, discharging
+        - InRoute = Circulating in route, discharging
         Check status
         
         '''
         if (self.status == "Parked"):
-            print("Bus parqueado")
+            print(self.busId + ": - Bus parqueado")
             
         
         
