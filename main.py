@@ -44,7 +44,7 @@ def calculateTimeTables(route, RSP, REP, STime, ETime, Frequency):
     depTime = STime
 
     
-    while(depTime <= ETime):
+    while(depTime < ETime):
         line = pd.DataFrame([[route, RSP, REP, depTime]],
                             columns = ["Route","RSP","REP","DepTime"])
         #print(line)
