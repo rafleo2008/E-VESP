@@ -86,7 +86,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable):
 
         for bus in fleet:
             #print(bus.status)
-            bus.runStep(minuteStep,60)
+            bus.runStep(minuteStep,60, simStep)
 
         #NorthPIR.runStep(simStep,m.myTimeTable)
         ## Report 
@@ -94,7 +94,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable):
             # This could be also a function
             print("Reporte del paso " + str(simStep))
             for bus in fleet:
-                print(bus.busId + " - Estado : "+ bus.status + "SoC: " + str(bus.soc) + " - Odometer: " + str(bus.odo))
+                print(bus.busId + " - Estado : "+ bus.status + "SoC: " + str(bus.soc) + " - Odometer: " + str(bus.odo) + " - routepos" +str(bus.routePosit))
         
                 
         ## Simulate in-route bus at step 300
@@ -109,15 +109,26 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable):
         #print(departure)
         
         ## This will be depreciated once we implement a search among availabe vehicles sorted by arrival time
+        ## Look for available buses
+        
+        available_buses_indexes = []
+        counterA = 0
+        for bus in fleet:
+            if bus.status == "Parked":
+               
+                available_buses_indexes.append(counterA)
+            counterA = counterA + 1
+        available_buses = len(available_buses_indexes)
+        
 
         if(simStep == departure.TimeStep):
             print("Departure simstep " + str(simStep))
-            fleet[i].assignStatus("InRoute")
-            fleet[i].innitializeRoute()
+            print("Hay " +str(available_buses)+" buses disponibles")
+            fleet[available_buses_indexes[0]].assignStatus("InRoute")
+            fleet[available_buses_indexes[0]].innitializeRoute()
+            print("Bus no "+ fleet[available_buses_indexes[0]].busId +" ha inicado ruta en el simStep" + str(simStep))
             row = row + 1
-            i = i + 1
-            
-        
+            #
             
         
         counter = counter + 1
@@ -185,7 +196,7 @@ SouthPIR = o.PIR("South", "A1", "Depot1")
 ## Create Bus Fleet (Specific size)
 ## Further development will include a default bus fleet calculation
 
-n = 50 # further input variable
+n = 16 # further input variable
 
 fleet = []
 
