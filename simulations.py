@@ -44,7 +44,7 @@ EBus
     
 '''
 ## Functions
-def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable):
+def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, logs):
     '''
     This function run the model from start time to end time, at each sim resolution,
     reports every report freq (steps) and use the fleet and timetable to interact
@@ -133,6 +133,9 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable):
         
         counter = counter + 1
         simStep = simStep + simResolution
+    
+    with open("logfile.txt", "w") as output:
+        output.write(str(logs))
 
 def dateToTimeStep(day, hour, minute):
     ## Convert day, hour and minute to timesteps
@@ -159,7 +162,7 @@ from datetime import datetime
 from datetime import timedelta
 import objects as o
 import pandas as pd
-
+logs = []
 ## Default input parameters
 
 ## Base parameters, pending to convert to todays parameters
@@ -184,11 +187,13 @@ end_min_step = dateToTimeStep (end_day, end_hour, end_minute)
 
 
 print("Simulation start at {} timesteps".format(start_min_step))
-print("Simulation end at {} timesteps".format(end_min_step))
+logs.append("Simulation start at {} timesteps".format(start_min_step))
 
+print("Simulation end at {} timesteps".format(end_min_step))
+logs.append("Simulation end at {} timesteps".format(end_min_step))
 ### End new simulation step procedure
 
-##  PIR Definitions
+##  PIR Definitions (To be depreciated)
 
 NorthPIR = o.PIR("North", "A1", "Depot1")
 SouthPIR = o.PIR("South", "A1", "Depot1")
@@ -222,6 +227,7 @@ for i in range(n):
 for bus in fleet:
     
     print(bus.busId)
+    logs.append(bus.busId)
 
 ## Open timetable
 
@@ -238,13 +244,13 @@ myTimeTable["TimeStep"] = (myTimeTable["DepTime"] - reference_time).dt.total_sec
 
 
 print(myTimeTable)
+logs.append(str(myTimeTable))
 
 
    
 ## Run Model
 
-runModel(start_min_step, end_min_step, min_time_step, 60, fleet, myTimeTable)
-
+runModel(start_min_step, end_min_step, min_time_step, 60, fleet, myTimeTable, logs)
 
 
 
