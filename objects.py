@@ -45,6 +45,7 @@ class eBus:
         self.socpe = socpe
         self.odo = odo
         self.busId = busId
+        self.routePosit = 0
         
         ## Actions
         eBus.fleet.append(self)
@@ -73,7 +74,7 @@ class eBus:
         
     def setBusId (self, identifier):
         self.identifier = identifier
-    def runStep(self, step, speed):
+    def runStep(self, step, speed, simStep):
                 
         currentStatus = self.status
         energy = step*speed
@@ -99,8 +100,18 @@ class eBus:
             # Update position
             # Stop if SoC <+ 10%
             #print(self.busId + self.status)
-            self.soc = self.soc - (speed*(step/60))*self.consNoAC
-            self.odo = self.odo + speed*(step/60)
+            self.soc = self.soc - (self.routeSpeed*(step/60))*self.consAC
+            self.odo = self.odo + self.routeSpeed*(step/60)
+            # Update route
+            self.routePosit = min(self.routePosit + self.routeSpeed*(step/60), self.routeLengt)
+            
+            #Check if bus has arrived to bus depot and assing a new status
+            if(self.routePosit == self.routeLengt):
+                self.status = "Parked"
+                self.routePosit = 0
+                print(self.busId + "has arrived to end of the route,at sim step" + str(simStep) +" send to parking")
+            
+            
             if( self.soc <= self.capacity*0.1): # Stop if battery is below 10%
                 self.status = "Charging"
         elif(self.status == "Charging"):
@@ -109,7 +120,8 @@ class eBus:
             
             self.soc = min(maxCharge, charge)
             if (self.soc == maxCharge):
-                self.status = "Charged"
+                self.status = "Parked"
+                
             
 
             
