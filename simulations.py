@@ -63,6 +63,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
     '''
     ## Initialize time control variables
     global log
+    global busResults
     log = printAndCompileMsg("RunModel function starts", 
                              log)
 
@@ -105,6 +106,14 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                                          str(bus.tripscounter)+ ",Route len: "+
                                          str(bus.routeLengt), 
                                          log)
+                busResults.append([simStep,
+                                   bus.busId,
+                                   bus.status,
+                                   bus.soc,
+                                   bus.odo,
+                                   bus.routePosit,
+                                   bus.tripscounter])
+
                        
         
         departure = myTimeTable.iloc[row]
@@ -209,6 +218,16 @@ end_min_step = dateToTimeStep (end_day, end_hour, end_minute)
 
 ### Setting up log file
 log = []
+### Setting up results file
+busResultsHeaders = ['TimeStep',
+                    'Bus_Id',
+                    'Status',
+                    'SoC',
+                    'Odometer',
+                    'Route_Position',
+                    'Trips_Completed'
+    ]
+busResults = []
 
 log = printAndCompileMsg("Model starts running", log)
 log = printAndCompileMsg("Simulation start at {} timesteps".format(start_min_step), 
@@ -271,9 +290,12 @@ print(myTimeTable)
    
 ## Run Model
 
-runModel(start_min_step, end_min_step, min_time_step, 1, fleet, myTimeTable, logs)
+runModel(start_min_step, end_min_step, min_time_step, 1, fleet, myTimeTable, log)
 
 
 log = printAndCompileMsg("Run finalized correctly", log)
 
 writeMessages(log)
+
+busResultsDF = pd.DataFrame(data = busResults, columns = busResultsHeaders)
+busResultsDF.to_csv("BUs_results.csv")
