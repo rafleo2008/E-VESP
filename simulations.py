@@ -62,7 +62,10 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
      
     '''
     ## Initialize time control variables
-    print("Simulation run starts")
+    global log
+    log = printAndCompileMsg("RunModel function starts", 
+                             log)
+
     simStep = startTime
     counter = 0
     minuteStep = simResolution
@@ -73,11 +76,12 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
     ## Initialize vehicles, PIR and controllers
     for bus in fleet:
         bus.assignStatus("Parked")
+        log = printAndCompileMsg(str(simStep)+', '+ bus.busId + " parked",
+                                 log)
     
     while(simStep <=endTime):
         ## Time loop, here, the model will run in each step
         
-
         
         ## All objects actions (busses, controllers, buscontroller)
         
@@ -85,25 +89,20 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
         # This should be inside a batch to run all busses at once
 
         for bus in fleet:
-            #print(bus.status)
+
             bus.runStep(minuteStep,60, simStep)
 
         #NorthPIR.runStep(simStep,m.myTimeTable)
         ## Report 
         if (counter%reportFreq == 0):
+            
             # This could be also a function
-            print("Reporte del paso " + str(simStep))
+            log = printAndCompileMsg(str(simStep)+', '+"Reporte del paso ",
+                                     log)
             for bus in fleet:
-                print(bus.busId + " - Estado : "+ bus.status + "SoC: " + str(bus.soc) + " - Odometer: " + str(bus.odo) + " - routepos" +str(bus.routePosit))
-        
-                
-        ## Simulate in-route bus at step 300
-        '''
-        if (simStep == 300):
-            ## Status tests
-            fleet[5].assignStatus("InRoute")
-        '''
-        
+                log = printAndCompileMsg(bus.busId + " - Estado : "+ bus.status + "SoC: " + str(bus.soc) + " - Odometer: " + str(bus.odo) + " - routepos" +str(bus.routePosit),
+                                         log)
+                       
         
         departure = myTimeTable.iloc[row]
         #print(departure)
@@ -151,6 +150,16 @@ def timeStepToDate(timeStep):
     return days, hours, minutes
     #hours = (timeSteps%(60*24))/24
     #minute = ((timeSteps%(60*24))/24)
+def printAndCompileMsg(text, log):
+    print(text)
+    log.append(text)
+    return log
+
+def writeMessages(log):
+    with open('results.txt', 'w') as f:
+        for message in log:
+            f.write(message + '\n')
+    
     
                
 ## Import main libraries
@@ -162,7 +171,8 @@ from datetime import datetime
 from datetime import timedelta
 import objects as o
 import pandas as pd
-logs = []
+
+
 ## Default input parameters
 
 ## Base parameters, pending to convert to todays parameters
@@ -184,14 +194,15 @@ min_time_step = 1
 start_min_step = dateToTimeStep(start_day, start_hour, start_minute)
 end_min_step = dateToTimeStep (end_day, end_hour, end_minute)
 
+### Setting up log file
+log = []
 
+log = printAndCompileMsg("Model starts running", log)
+log = printAndCompileMsg("Simulation start at {} timesteps".format(start_min_step), 
+                         log)
+log = printAndCompileMsg("Simulation end at {} timesteps".format(end_min_step), 
+                         log)
 
-print("Simulation start at {} timesteps".format(start_min_step))
-logs.append("Simulation start at {} timesteps".format(start_min_step))
-
-print("Simulation end at {} timesteps".format(end_min_step))
-logs.append("Simulation end at {} timesteps".format(end_min_step))
-### End new simulation step procedure
 
 ##  PIR Definitions (To be depreciated)
 
@@ -201,15 +212,16 @@ SouthPIR = o.PIR("South", "A1", "Depot1")
 ## Create Bus Fleet (Specific size)
 ## Further development will include a default bus fleet calculation
 
-n = 16 # further input variable
+
+n = 16 # further input variable, further development will include validation
 
 fleet = []
 
 
 for i in range(n):
     busId = f"Ebus_E{i:02d}"
+    log = printAndCompileMsg("Creando bus " + busId, log)
     
-    print("Creando bus " + busId)
     bus = o.eBus('Sunwin', 
                  'EVB8m',
                  2023,
@@ -223,11 +235,8 @@ for i in range(n):
                  busId)
     
     fleet.append(bus)
-    
-for bus in fleet:
-    
-    print(bus.busId)
-    logs.append(bus.busId)
+
+log = printAndCompileMsg("Created vehicles in fleet", log)
 
 ## Open timetable
 
@@ -244,13 +253,14 @@ myTimeTable["TimeStep"] = (myTimeTable["DepTime"] - reference_time).dt.total_sec
 
 
 print(myTimeTable)
-logs.append(str(myTimeTable))
 
 
    
 ## Run Model
 
-runModel(start_min_step, end_min_step, min_time_step, 60, fleet, myTimeTable, logs)
+runModel(start_min_step, end_min_step, min_time_step, 1, fleet, myTimeTable, logs)
 
 
+log = printAndCompileMsg("Fun finalized correctly", log)
 
+writeMessages(log)

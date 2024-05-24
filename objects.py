@@ -7,7 +7,6 @@ Created on Thu Mar 23 19:42:01 2023
 ## Main modules
 
 from datetime import timedelta
-
 ## Objects definition
 
 ## ebus
@@ -75,7 +74,7 @@ class eBus:
     def setBusId (self, identifier):
         self.identifier = identifier
     def runStep(self, step, speed, simStep):
-                
+       
         currentStatus = self.status
         energy = step*speed
         #print(energy)
@@ -109,7 +108,9 @@ class eBus:
             if(self.routePosit == self.routeLengt):
                 self.status = "Parked"
                 self.routePosit = 0
-                print(self.busId + "has arrived to end of the route,at sim step" + str(simStep) +" send to parking")
+                
+                #log = s.printAndCompileMsg(self.busId + "has arrived to end of the route,at sim step" + str(simStep) +" send to parking",log)
+
             
             
             if( self.soc <= self.capacity*0.1): # Stop if battery is below 10%
