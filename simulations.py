@@ -100,7 +100,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
             log = printAndCompileMsg(str(simStep)+', '+"Reporte del paso ",
                                      log)
             for bus in fleet:
-                log = printAndCompileMsg(bus.busId + " - Estado : "+ bus.status + "SoC: " + str(bus.soc) + " - Odometer: " + str(bus.odo) + " - routepos" +str(bus.routePosit),
+                log = printAndCompileMsg(bus.busId + " - Estado : "+ bus.status + "SoC: " + str(bus.soc) + " - Odometer: " + str(bus.odo) + " - routepos" +str(bus.routePosit) + " - No trips "+str(bus.tripscounter), 
                                          log)
                        
         
@@ -113,14 +113,21 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
         available_buses_indexes = []
         counterA = 0
         for bus in fleet:
-            if bus.status == "Parked":
+            if bus.status == "Parked" and bus.soc >= (250*.1)+(22*.9):
                
                 available_buses_indexes.append(counterA)
             counterA = counterA + 1
         available_buses = len(available_buses_indexes)
+        ## Charge empty busses
+        busCount = 0
+        for bus in fleet:
+            if bus.status == "Parked" and bus.soc <= (250*.1)+(22*.9):
+                fleet[busCount].assignStatus("Charging")
+                
         
 
-        if(simStep == departure.TimeStep):
+        if(simStep == departure.TimeStep):  #Fleet assignment
+
             print("Departure simstep " + str(simStep))
             print("Hay " +str(available_buses)+" buses disponibles")
             fleet[available_buses_indexes[0]].assignStatus("InRoute")
