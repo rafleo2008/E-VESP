@@ -46,7 +46,7 @@ class eBus:
         self.busId = busId
         self.routePosit = 0
         self.tripscounter = 0
-        
+        self.routeLengt = 999999
         ## Actions
         eBus.fleet.append(self)
         
@@ -59,6 +59,8 @@ class eBus:
 
     def assignStatus(self, status):
         self.status = status
+    def restartRoutePosit (self):
+        self.routePosit = 0
     def innitializeRoute(self):
         ## Prueba con ruta standar
         freq = 5 # 5 minutos
@@ -115,8 +117,7 @@ class eBus:
 
             
             
-            if( self.soc <= self.capacity*0.1): # Stop if battery is below 10%
-                self.status = "Charging"
+
         elif(self.status == "Charging"):
             maxCharge = self.capacity
             charge = self.soc + (120*(step/60)) ##120kwh power, change to a variable soon (from charger)
@@ -124,6 +125,8 @@ class eBus:
             self.soc = min(maxCharge, charge)
             if (self.soc == maxCharge):
                 self.status = "Parked"
+                self.routePosit = 0
+                
                 
             
 
