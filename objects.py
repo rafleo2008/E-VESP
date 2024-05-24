@@ -45,6 +45,7 @@ class eBus:
         self.odo = odo
         self.busId = busId
         self.routePosit = 0
+        self.tripscounter = 0
         
         ## Actions
         eBus.fleet.append(self)
@@ -108,6 +109,7 @@ class eBus:
             if(self.routePosit == self.routeLengt):
                 self.status = "Parked"
                 self.routePosit = 0
+                self.tripscounter = self.tripscounter + 1
                 
                 #log = s.printAndCompileMsg(self.busId + "has arrived to end of the route,at sim step" + str(simStep) +" send to parking",log)
 
