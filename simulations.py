@@ -89,18 +89,21 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
         # This should be inside a batch to run all busses at once
 
         for bus in fleet:
-
             bus.runStep(minuteStep,60, simStep)
 
-        #NorthPIR.runStep(simStep,m.myTimeTable)
-        ## Report 
         if (counter%reportFreq == 0):
             
             # This could be also a function
-            log = printAndCompileMsg(str(simStep)+', '+"Reporte del paso ",
-                                     log)
+
             for bus in fleet:
-                log = printAndCompileMsg(bus.busId + " - Estado : "+ bus.status + "SoC: " + str(bus.soc) + " - Odometer: " + str(bus.odo) + " - routepos" +str(bus.routePosit) + " - No trips "+str(bus.tripscounter), 
+                log = printAndCompileMsg(str(simStep)+ "," + 
+                                         bus.busId + ", Estado :"+
+                                         bus.status + ", SoC: " +
+                                         str(bus.soc) + ", Odometer: " +
+                                         str(bus.odo) + ", routepos: " +
+                                         str(bus.routePosit) + ",No trips: "+
+                                         str(bus.tripscounter)+ ",Route len: "+
+                                         str(bus.routeLengt), 
                                          log)
                        
         
@@ -112,17 +115,20 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
         
         available_buses_indexes = []
         counterA = 0
+        # Check available busses (Parked and with enough energy)
         for bus in fleet:
             if bus.status == "Parked" and bus.soc >= (250*.1)+(22*.9):
-               
                 available_buses_indexes.append(counterA)
             counterA = counterA + 1
         available_buses = len(available_buses_indexes)
-        ## Charge empty busses
+        
+        # Send parked and discharged buses to charge
         busCount = 0
         for bus in fleet:
             if bus.status == "Parked" and bus.soc <= (250*.1)+(22*.9):
                 fleet[busCount].assignStatus("Charging")
+                fleet[busCount].restartRoutePosit()
+            busCount = busCount +1
                 
         
 
@@ -268,6 +274,6 @@ print(myTimeTable)
 runModel(start_min_step, end_min_step, min_time_step, 1, fleet, myTimeTable, logs)
 
 
-log = printAndCompileMsg("Fun finalized correctly", log)
+log = printAndCompileMsg("Run finalized correctly", log)
 
 writeMessages(log)
