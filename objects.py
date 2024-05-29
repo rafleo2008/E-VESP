@@ -18,17 +18,17 @@ class eBus:
     fleet = []
     
     def __init__(self, 
-                 brand: str,
-                 model: str,
-                 year: int, #Delete?
-                 capacity: float, 
-                 acON: bool, 
-                 consAC: float,
-                 consNoAC: float,
-                 soc: float,
-                 socpe: float,
-                 odo: float,
-                 busId: str
+                 brand: str,            # Bus Brand
+                 model: str,            # Bus model
+                 year: int, #Delete?    # Bus year
+                 capacity: float,       # Bus Capacity (seated +stand)
+                 acON: bool,            # Bool (is using AC?)
+                 consAC: float,         # Reference consumption using AC
+                 consNoAC: float,       # Reference consumption not using AC
+                 soc: float,            # SoC in kWh
+                 socpe: float,          # Soc in percentage
+                 odo: float,            # Odometer
+                 busId: str             # Bus ID to identify vehicle in simulation
                  ):
         
         ## Assign self initial parameters
@@ -72,7 +72,7 @@ class eBus:
         self.routeLengt = routeLen 
         self.routePosit = 0
         self.routeSpeed = routeSpe
-        
+        self.emptyLengt = 5 
         
     def setBusId (self, identifier):
         self.identifier = identifier
@@ -96,6 +96,11 @@ class eBus:
         Check status
         
         '''
+        ## Transit
+        if (self.status == "InTransit"):
+            ## Move the bus around the emtpy length
+            ## Once the empty lenght has been reached, it pass to InRoute
+            
         if (self.status == "InRoute"):
             # In route should 1. Check SoC
             # Adjust SoC
