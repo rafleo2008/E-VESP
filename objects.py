@@ -100,6 +100,13 @@ class eBus:
         if (self.status == "InTransit"):
             ## Move the bus around the emtpy length
             ## Once the empty lenght has been reached, it pass to InRoute
+            self.odo = self.odo + self.routeSpeed*(step/60)
+            self.routePosit = min(self.routePosit + self.routeSpeed*(step/60), self.emptyLengt)
+            if (self.routePosit == self.emptyLengt):
+                self.status = "AvailableInPIR"
+                self.routePosit = 0
+                
+            
             
         if (self.status == "InRoute"):
             # In route should 1. Check SoC
