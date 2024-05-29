@@ -71,6 +71,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
     counter = 0
     minuteStep = simResolution
     row = 0
+    rowA = 0
     i = 0
     #minuteStep = simResolution.total_seconds()/60
     
@@ -81,13 +82,19 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                                  log)
     
     while(simStep <=endTime):
-        ## Time loop, here, the model will run in each step
-        
-        
+        ## Time loop, here, the model will run in each step   
         ## All objects actions (busses, controllers, buscontroller)
         
-        # Cannot use speed, tag speed using controller
-        # This should be inside a batch to run all busses at once
+        ## Identify need in advance of busses
+        
+        timeToPir = math.ceil((5/17)*60) # time from bus depot to PIR in minutes
+        
+        ## 01. Check for need to departure busses from bus depot to PIR
+        
+
+
+        
+        
 
         for bus in fleet:
             bus.runStep(minuteStep,60, simStep)
@@ -116,7 +123,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
 
                        
         
-        departure = myTimeTable.iloc[row]
+        
         #print(departure)
         
         ## This will be depreciated once we implement a search among availabe vehicles sorted by arrival time
@@ -130,6 +137,17 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                 available_buses_indexes.append(counterA)
             counterA = counterA + 1
         available_buses = len(available_buses_indexes)
+        print("Hay "+ str(available_buses) + "disponibles en patio, el primero es " + str(fleet[available_buses_indexes[0]].busId) )
+        print(available_buses_indexes)
+        
+        available_buses_PIR_index = []
+        busCountPIR = 0
+        for bus in fleet:
+            if bus.status == "AvailableInPIR":
+               available_buses_PIR_index.append(busCountPIR)
+            busCountPIR = busCountPIR + 1
+        available_buses = len(available_buses_PIR_index)                
+                
         
         # Send parked and discharged buses to charge
         busCount = 0
@@ -138,16 +156,28 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                 fleet[busCount].assignStatus("Charging")
                 fleet[busCount].restartRoutePosit()
             busCount = busCount +1
-                
         
+        
+        depBusdep = myTimeTable.iloc[rowA]
+        departure = myTimeTable.iloc[row]
+        
+        
+        if(simStep == (round(depBusdep.TimeStep,0) - timeToPir - 1)):      # Here we have to implement future bus depot
+            # Check available busses
+            print("Send a bus to InRoute"+ fleet[available_buses_indexes[0]].busId)
+            fleet[available_buses_indexes[0]].innitializeRoute()
+            fleet[available_buses_indexes[0]].assignStatus("InTransit")
+            rowA = rowA + 1
+                
+
 
         if(simStep == departure.TimeStep):  #Fleet assignment
 
             print("Departure simstep " + str(simStep))
-            print("Hay " +str(available_buses)+" buses disponibles")
-            fleet[available_buses_indexes[0]].assignStatus("InRoute")
-            fleet[available_buses_indexes[0]].innitializeRoute()
-            print("Bus no "+ fleet[available_buses_indexes[0]].busId +" ha inicado ruta en el simStep" + str(simStep))
+            print("Hay " +str(available_buses_PIR_index)+" buses disponibles")
+            fleet[available_buses_PIR_index[0]].assignStatus("InRoute")
+            fleet[available_buses_PIR_index[0]].innitializeRoute()
+            print("Bus no "+ fleet[available_buses_PIR_index[0]].busId +" ha inicado ruta en el simStep" + str(simStep))
             row = row + 1
             #
             
@@ -193,6 +223,7 @@ from datetime import datetime
 from datetime import timedelta
 import objects as o
 import pandas as pd
+import math
 
 
 ## Default input parameters
