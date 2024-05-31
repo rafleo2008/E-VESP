@@ -61,7 +61,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
     
      
     '''
-    ## Initialize time control variables
+    ## 01. Initialize time control variables
     global log
     global busResults
     log = printAndCompileMsg("RunModel function starts", 
@@ -75,9 +75,13 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
     i = 0
     #minuteStep = simResolution.total_seconds()/60
     
-    ## Initialize vehicles, PIR and controllers
+    ## 02. Initialize vehicles, PIR and controllers
     for bus in fleet:
+        # Define innital location of buses
+        bus.setInitialLocation('Bus depot', 'Depot A')
+        # Define innital status
         bus.assignStatus("Parked")
+        # Save in log the created buses register
         log = printAndCompileMsg(str(simStep)+', '+ bus.busId + " parked",
                                  log)
     
@@ -225,24 +229,26 @@ import objects as o
 import pandas as pd
 import math
 
-
-## Default input parameters
-
-## Base parameters, pending to convert to todays parameters
-## start and end hour should be user inputs
+## General preparation codes
 
 
-### Start new simulation step procedure
-
+## 01. Set time parameters 
+## 01.1. Start time
 start_day = 0
 start_hour = 0
 start_minute = 0
+
+## 01.2. End Time
 
 end_day = 1
 end_hour = 0
 end_minute = 0
 
+## 01.3. Set time step (minimal discrete simulation interval (minutes))
+
 min_time_step = 1
+
+## 02. Configure start and end timestep
 
 start_min_step = dateToTimeStep(start_day, start_hour, start_minute)
 end_min_step = dateToTimeStep (end_day, end_hour, end_minute)
@@ -276,7 +282,7 @@ SouthPIR = o.PIR("South", "A1", "Depot1")
 ## Further development will include a default bus fleet calculation
 
 
-n = 16 # further input variable, further development will include validation
+n = 50 # further input variable, further development will include validation
 
 fleet = []
 
