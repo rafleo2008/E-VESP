@@ -76,6 +76,10 @@ class eBus:
         
     def setBusId (self, identifier):
         self.identifier = identifier
+    def setInitialLocation (self, placeType, place):
+        self.placeType = placeType
+        self.place = place
+        
     def runStep(self, step, speed, simStep):
        
         currentStatus = self.status
