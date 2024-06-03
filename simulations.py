@@ -142,9 +142,11 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                 available_buses_indexes.append(counterA)
             counterA = counterA + 1
         available_buses = len(available_buses_indexes)
-        
-        print("Hay "+ str(available_buses) + "disponibles en patio, el primero es " + str(fleet[available_buses_indexes[0]].busId) )
-        print(available_buses_indexes)
+        if available_buses== 0:
+            print("No hay buses disponibles")
+        else: 
+            print("Hay "+ str(available_buses) + "disponibles en patio, el primero es " + str(fleet[available_buses_indexes[0]].busId) )
+            print(available_buses_indexes)
         
         available_buses_PIR_index = []
         busCountPIR = 0
@@ -328,6 +330,14 @@ print(myTimeTable)
 
    
 ## 05. Run Model
+
+## Create route data
+
+## Route example
+routeA = {'name': "Route A",
+          'NoBusDep': 1,
+          'DepNames':['DepotA'],
+          'DepCoord':[[0,0]]}
 
 runModel(start_min_step, end_min_step, min_time_step, 1, fleet, myTimeTable, log)
 
