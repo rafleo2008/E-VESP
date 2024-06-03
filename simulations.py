@@ -136,11 +136,13 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
         available_buses_indexes = []
         counterA = 0
         # Check available busses (Parked and with enough energy)
+        
         for bus in fleet:
             if bus.status == "Parked" and bus.soc >= (250*.1)+(22*.9):
                 available_buses_indexes.append(counterA)
             counterA = counterA + 1
         available_buses = len(available_buses_indexes)
+        
         print("Hay "+ str(available_buses) + "disponibles en patio, el primero es " + str(fleet[available_buses_indexes[0]].busId) )
         print(available_buses_indexes)
         
@@ -232,7 +234,7 @@ import math
 ## General preparation codes
 
 
-## 01. Set time parameters 
+## 01. Set time parameters (to be replaced by an environment set up)
 ## 01.1. Start time
 start_day = 0
 start_hour = 0
@@ -253,9 +255,10 @@ min_time_step = 1
 start_min_step = dateToTimeStep(start_day, start_hour, start_minute)
 end_min_step = dateToTimeStep (end_day, end_hour, end_minute)
 
-### Setting up log file
+## 03. Setting up log and results files
 log = []
-### Setting up results file
+busResults = []
+## 03.1. Setting up results file
 busResultsHeaders = ['TimeStep',
                     'Bus_Id',
                     'Status',
@@ -264,7 +267,8 @@ busResultsHeaders = ['TimeStep',
                     'Route_Position',
                     'Trips_Completed'
     ]
-busResults = []
+
+## 04. Innitialization messages
 
 log = printAndCompileMsg("Model starts running", log)
 log = printAndCompileMsg("Simulation start at {} timesteps".format(start_min_step), 
@@ -272,20 +276,18 @@ log = printAndCompileMsg("Simulation start at {} timesteps".format(start_min_ste
 log = printAndCompileMsg("Simulation end at {} timesteps".format(end_min_step), 
                          log)
 
-
-##  PIR Definitions (To be depreciated)
+## 04. Create input data (To be replaced by an environment set up)
+## 04.1. Route settings 
+## 04.1.1. Bus Depot data
 
 NorthPIR = o.PIR("North", "A1", "Depot1")
 SouthPIR = o.PIR("South", "A1", "Depot1")
 
-## Create Bus Fleet (Specific size)
-## Further development will include a default bus fleet calculation
+## 04.1.2. Bus fleet definition
 
-
-n = 50 # further input variable, further development will include validation
+n = 20 # further input variable, further development will include validation
 
 fleet = []
-
 
 for i in range(n):
     busId = f"Ebus_E{i:02d}"
@@ -325,11 +327,11 @@ print(myTimeTable)
 
 
    
-## Run Model
+## 05. Run Model
 
 runModel(start_min_step, end_min_step, min_time_step, 1, fleet, myTimeTable, log)
 
-
+## 06. Write results
 log = printAndCompileMsg("Run finalized correctly", log)
 
 writeMessages(log)
