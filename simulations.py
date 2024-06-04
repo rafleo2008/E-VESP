@@ -95,14 +95,10 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
         
         ## 01. Check for need to departure busses from bus depot to PIR
         
-
-
-        
-        
-
         for bus in fleet:
             bus.runStep(minuteStep,60, simStep)
 
+        ## Generate report        
         if (counter%reportFreq == 0):
             
             # This could be also a function
@@ -125,9 +121,38 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                                    bus.routePosit,
                                    bus.tripscounter])
 
-                       
+        ## Check bus availability
+        availableInDepot = []       # Available buses in depot
+        availableInPIR = []
+        toBeAvailableinPIR = []
         
+        countAvaiDep = 0
+        countAvaiPIR = 0
+        countToBeAva = 0                            
         
+        # Loop checking availability
+        
+        fleetCount = 0
+        
+        for bus in fleet:
+            # Check if bus is available at depot
+            if bus.status == 'Parked' and bus.soc >= (250*.1)+(22*.9):
+                availableInDepot.append(fleetCount)
+                #print(str(len(availableInDepot))  +'veh en el patio')
+            # Check which buses are available at PIR
+            elif bus.status == 'AvailableInPIR':
+                availableInPIR.append(fleetCount)
+                #print(str(len(availableInPIR))  +'veh en el PIR')
+            # Check wich buses will be availabe at future dep Time
+            elif bus.status == 'InRoute' and bus.routeLengt - bus.routePosit <= 2 and bus.soc >= (250*.1)+(27*.9):
+                toBeAvailableinPIR.append(fleetCount)
+                #print(str(len(toBeAvailableinPIR))  +'A LEGAR AL PIR')
+
+            fleetCount = fleetCount + 1
+        
+
+
+        '''
         #print(departure)
         
         ## This will be depreciated once we implement a search among availabe vehicles sorted by arrival time
@@ -155,8 +180,35 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                available_buses_PIR_index.append(busCountPIR)
             busCountPIR = busCountPIR + 1
         available_buses = len(available_buses_PIR_index)                
-                
+        '''        
+        # Dispatch to PIR if there's no future available busses
         
+        #Bring timetable
+        
+        depBusdep = myTimeTable.iloc[rowA]
+        departure = myTimeTable.iloc[row]
+        
+        # Dispatch to PIR
+        if(simStep == (round(depBusdep.TimeStep,0) - timeToPir - 2)):
+            # Check if there is any vehicle to arrive at PIR
+            if len(toBeAvailableinPIR) == 0:
+                print("Send a bus to InRoute"+ fleet[availableInDepot[0]].busId)
+                fleet[availableInDepot[0]].innitializeRoute()
+                fleet[availableInDepot[0]].assignStatus("InTransit")
+                rowA = rowA + 1
+        
+        # Dispatch in PIR
+        
+        if(simStep == departure.TimeStep):  #Fleet assignment
+            print("Departure simstep " + str(simStep))
+            print("Hay " +str(len(availableInPIR))+" buses disponibles")
+            fleet[availableInPIR[0]].assignStatus("InRoute")
+            fleet[availableInPIR[0]].innitializeRoute()
+            print("Bus no "+ fleet[availableInPIR[0]].busId +" ha inicado ruta en el simStep" + str(simStep))
+            row = row + 1
+
+                
+       
         # Send parked and discharged buses to charge
         busCount = 0
         for bus in fleet:
@@ -165,33 +217,12 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                 fleet[busCount].restartRoutePosit()
             busCount = busCount +1
         
-        
-        depBusdep = myTimeTable.iloc[rowA]
-        departure = myTimeTable.iloc[row]
-        
-        
-        if(simStep == (round(depBusdep.TimeStep,0) - timeToPir - 1)):      # Here we have to implement future bus depot
-            # Check available busses
-            print("Send a bus to InRoute"+ fleet[available_buses_indexes[0]].busId)
-            fleet[available_buses_indexes[0]].innitializeRoute()
-            fleet[available_buses_indexes[0]].assignStatus("InTransit")
-            rowA = rowA + 1
-                
-
-
-        if(simStep == departure.TimeStep):  #Fleet assignment
-
-            print("Departure simstep " + str(simStep))
-            print("Hay " +str(available_buses_PIR_index)+" buses disponibles")
-            fleet[available_buses_PIR_index[0]].assignStatus("InRoute")
-            fleet[available_buses_PIR_index[0]].innitializeRoute()
-            print("Bus no "+ fleet[available_buses_PIR_index[0]].busId +" ha inicado ruta en el simStep" + str(simStep))
-            row = row + 1
-            #
-            
+        # Next steps
         
         counter = counter + 1
         simStep = simStep + simResolution
+    
+    ## Close logfile
     
     with open("logfile.txt", "w") as output:
         output.write(str(logs))
@@ -287,7 +318,7 @@ SouthPIR = o.PIR("South", "A1", "Depot1")
 
 ## 04.1.2. Bus fleet definition
 
-n = 20 # further input variable, further development will include validation
+n = 25 # further input variable, further development will include validation
 
 fleet = []
 
