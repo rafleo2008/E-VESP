@@ -123,11 +123,32 @@ class eBus:
             # Update route
             self.routePosit = min(self.routePosit + self.routeSpeed*(step/60), self.routeLengt)
             
-            #Check if bus has arrived to bus depot and assing a new status
+            #Check if bus has arrived route end, assign as available if it has enough battery, if not, send to BUs depot to charge
             if(self.routePosit == self.routeLengt):
-                self.status = "Parked"
+                
                 self.routePosit = 0
                 self.tripscounter = self.tripscounter + 1
+                
+                if(self.soc > (250*.1)+(22*.9)):
+                    self.status = "AvailableInPIR"
+                else:
+                    self.status = 'ReturnToDepot'
+                    self.routePosit = 0
+        
+        ### If returning to Depot, discharge and count
+        
+        if (self.status == 'ReturnToDepot'):
+            self.odo = self.odo + self.routeSpeed*(step/60)
+            self.routePosit = min(self.routePosit + self.routeSpeed*(step/60), self.emptyLengt)
+            if (self.routePosit == self.emptyLengt):
+                self.status = "Parked"
+                self.routePosit = 0
+            
+                
+                
+                
+                
+
                 
                 #log = s.printAndCompileMsg(self.busId + "has arrived to end of the route,at sim step" + str(simStep) +" send to parking",log)
 
