@@ -138,6 +138,7 @@ class eBus:
         ### If returning to Depot, discharge and count
         
         if (self.status == 'ReturnToDepot'):
+            self.soc = self.soc - (self.routeSpeed*(step/60))*self.consAC
             self.odo = self.odo + self.routeSpeed*(step/60)
             self.routePosit = min(self.routePosit + self.routeSpeed*(step/60), self.emptyLengt)
             if (self.routePosit == self.emptyLengt):
