@@ -318,7 +318,7 @@ SouthPIR = o.PIR("South", "A1", "Depot1")
 
 ## 04.1.2. Bus fleet definition
 
-n = 25 # further input variable, further development will include validation
+n = 16 # further input variable, further development will include validation
 
 fleet = []
 
@@ -373,9 +373,10 @@ routeA = {'name': "Route A",
 runModel(start_min_step, end_min_step, min_time_step, 1, fleet, myTimeTable, log)
 
 ## 06. Write results
-log = printAndCompileMsg("Run finalized correctly", log)
+
 
 writeMessages(log)
 
 busResultsDF = pd.DataFrame(data = busResults, columns = busResultsHeaders)
 busResultsDF.to_csv("BUs_results.csv")
+log = printAndCompileMsg("Run finalized correctly", log)
