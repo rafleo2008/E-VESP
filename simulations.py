@@ -144,7 +144,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                 availableInPIR.append(fleetCount)
                 #print(str(len(availableInPIR))  +'veh en el PIR')
             # Check wich buses will be availabe at future dep Time
-            elif bus.status == 'InRoute' and (bus.routeLengt - bus.routePosit <= 0.5) and bus.soc >= (250*.1)+(27*.9):
+            elif (bus.status == 'InRoute' and (bus.routeLengt - bus.routePosit <= 0.5) and bus.soc >= (250*.1)+(27*.9)):
                 toBeAvailableinPIR.append(fleetCount)
                 #print(str(len(toBeAvailableinPIR))  +'A LEGAR AL PIR')
 
