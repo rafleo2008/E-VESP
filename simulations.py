@@ -144,7 +144,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                 availableInPIR.append(fleetCount)
                 #print(str(len(availableInPIR))  +'veh en el PIR')
             # Check wich buses will be availabe at future dep Time
-            elif bus.status == 'InRoute' and bus.routeLengt - bus.routePosit <= 2 and bus.soc >= (250*.1)+(27*.9):
+            elif bus.status == 'InRoute' and (bus.routeLengt - bus.routePosit <= 0.5) and bus.soc >= (250*.1)+(27*.9):
                 toBeAvailableinPIR.append(fleetCount)
                 #print(str(len(toBeAvailableinPIR))  +'A LEGAR AL PIR')
 
@@ -189,13 +189,14 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
         departure = myTimeTable.iloc[row]
         
         # Dispatch to PIR
-        if(simStep == (round(depBusdep.TimeStep,0) - timeToPir - 2)):
+        if(simStep == (round(depBusdep.TimeStep,0) - timeToPir - 1)):
             # Check if there is any vehicle to arrive at PIR
             if len(toBeAvailableinPIR) == 0:
                 print("Send a bus to InRoute"+ fleet[availableInDepot[0]].busId)
                 fleet[availableInDepot[0]].innitializeRoute()
                 fleet[availableInDepot[0]].assignStatus("InTransit")
                 rowA = rowA + 1
+        print(str(len(toBeAvailableinPIR))+ " vehicles will arrive soon to PIR")
         
         # Dispatch in PIR
         
