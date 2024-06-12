@@ -141,6 +141,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
             if bus.status == 'Parked' and bus.soc >= (250*.1)+(22*.9):
                 availableInDepot.append(fleetCount)
                 #print(str(len(availableInDepot))  +'veh en el patio')
+                
             # Check which buses are available at PIR
             elif bus.status == 'AvailableInPIR':
                 availableInPIR.append(fleetCount)
@@ -200,6 +201,9 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
         busCount = 0
         for bus in fleet:
             if bus.status == "Parked" and bus.soc <= (250*.1)+(22*.9):
+                fleet[busCount].assignStatus("Charging")
+                fleet[busCount].restartRoutePosit()
+            if bus.status == "Parked" and myTimeTable.shape[0] <= row:
                 fleet[busCount].assignStatus("Charging")
                 fleet[busCount].restartRoutePosit()
             busCount = busCount +1
@@ -271,7 +275,7 @@ start_minute = 0
 ## 01.2. End Time
 
 end_day = 1
-end_hour = 0
+end_hour = 4
 end_minute = 0
 
 ## 01.3. Set time step (minimal discrete simulation interval (minutes))
