@@ -104,6 +104,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
             # This could be also a function
 
             for bus in fleet:
+
                 log = printAndCompileMsg(str(simStep)+ "," + 
                                          bus.busId + ", Estado :"+
                                          bus.status + ", SoC: " +
@@ -113,6 +114,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                                          str(bus.tripscounter)+ ",Route len: "+
                                          str(bus.routeLengt), 
                                          log)
+
                 busResults.append([simStep,
                                    bus.busId,
                                    bus.status,
@@ -146,67 +148,51 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
             # Check wich buses will be availabe at future dep Time
             elif (bus.status == 'InRoute' and (bus.routeLengt - bus.routePosit <= 0.5) and bus.soc >= (250*.1)+(27*.9)):
                 toBeAvailableinPIR.append(fleetCount)
+            
                 #print(str(len(toBeAvailableinPIR))  +'A LEGAR AL PIR')
 
             fleetCount = fleetCount + 1
         
-
-
-        '''
-        #print(departure)
-        
-        ## This will be depreciated once we implement a search among availabe vehicles sorted by arrival time
-        ## Look for available buses
-        
-        available_buses_indexes = []
-        counterA = 0
-        # Check available busses (Parked and with enough energy)
-        
-        for bus in fleet:
-            if bus.status == "Parked" and bus.soc >= (250*.1)+(22*.9):
-                available_buses_indexes.append(counterA)
-            counterA = counterA + 1
-        available_buses = len(available_buses_indexes)
-        if available_buses== 0:
-            print("No hay buses disponibles")
-        else: 
-            print("Hay "+ str(available_buses) + "disponibles en patio, el primero es " + str(fleet[available_buses_indexes[0]].busId) )
-            print(available_buses_indexes)
-        
-        available_buses_PIR_index = []
-        busCountPIR = 0
-        for bus in fleet:
-            if bus.status == "AvailableInPIR":
-               available_buses_PIR_index.append(busCountPIR)
-            busCountPIR = busCountPIR + 1
-        available_buses = len(available_buses_PIR_index)                
-        '''        
         # Dispatch to PIR if there's no future available busses
         
         #Bring timetable
+
+        ## Send buses back to bus depot if there are no more dispaths
+        if myTimeTable.shape[0] == row:
+            print(simStep)
+
+            print("No more dispatches, send available buses to bus depot")
+            # Check if we have buses available in pir, then send to bus depot
+            if len(availableInPIR) > 0:
+                for busId in availableInPIR:
+                    fleet[busId].assignStatus('ReturnToDepot')
         
-        depBusdep = myTimeTable.iloc[rowA]
-        departure = myTimeTable.iloc[row]
+        ## Depart if there are available dispatch
         
-        # Dispatch to PIR
-        if(simStep == (round(depBusdep.TimeStep,0) - timeToPir - 1)):
-            # Check if there is any vehicle to arrive at PIR
-            if len(toBeAvailableinPIR) == 0:
-                print("Send a bus to InRoute"+ fleet[availableInDepot[0]].busId)
-                fleet[availableInDepot[0]].innitializeRoute()
-                fleet[availableInDepot[0]].assignStatus("InTransit")
-                rowA = rowA + 1
-        print(str(len(toBeAvailableinPIR))+ " vehicles will arrive soon to PIR")
+        if myTimeTable.shape[0] > row:
+            
+            depBusdep = myTimeTable.iloc[rowA]
+            departure = myTimeTable.iloc[row]
         
-        # Dispatch in PIR
-        
-        if(simStep == departure.TimeStep):  #Fleet assignment
-            print("Departure simstep " + str(simStep))
-            print("Hay " +str(len(availableInPIR))+" buses disponibles")
-            fleet[availableInPIR[0]].assignStatus("InRoute")
-            fleet[availableInPIR[0]].innitializeRoute()
-            print("Bus no "+ fleet[availableInPIR[0]].busId +" ha inicado ruta en el simStep" + str(simStep))
-            row = row + 1
+            # Dispatch to PIR
+            if(simStep == (round(depBusdep.TimeStep,0) - timeToPir - 1)):
+                # Check if there is any vehicle to arrive at PIR
+                if len(toBeAvailableinPIR) == 0:
+                    print("At "+ str(simStep) +", send a bus to InRoute"+ fleet[availableInDepot[0]].busId)
+                    fleet[availableInDepot[0]].innitializeRoute()
+                    fleet[availableInDepot[0]].assignStatus("InTransit")
+                    rowA = rowA + 1
+
+            
+            # Dispatch in PIR
+            
+            if(simStep == departure.TimeStep):  #Fleet assignment
+                print("Departure simstep " + str(simStep))
+                print("Hay " +str(len(availableInPIR))+" buses disponibles")
+                fleet[availableInPIR[0]].assignStatus("InRoute")
+                fleet[availableInPIR[0]].innitializeRoute()
+                print("Bus no "+ fleet[availableInPIR[0]].busId +" ha inicado ruta en el simStep" + str(simStep))
+                row = row + 1
 
                 
        
@@ -218,10 +204,13 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                 fleet[busCount].restartRoutePosit()
             busCount = busCount +1
         
+
+        
         # Next steps
         
         counter = counter + 1
         simStep = simStep + simResolution
+        
     
     ## Close logfile
     
@@ -264,9 +253,14 @@ from datetime import timedelta
 import objects as o
 import pandas as pd
 import math
+from pathlib import Path
+
 
 ## General preparation codes
+## Open timetables
+timeTablesPath = Path("Intermediate/timetables.csv")
 
+compiledTimeTable = pd.read_csv(timeTablesPath)
 
 ## 01. Set time parameters (to be replaced by an environment set up)
 ## 01.1. Start time
@@ -347,7 +341,7 @@ log = printAndCompileMsg("Created vehicles in fleet", log)
 
  
 # Enviar esto a main
-myTimeTable = m.compiledTimeTable
+myTimeTable = compiledTimeTable
 myTimeTable["DepTime"] = pd.to_datetime(myTimeTable["DepTime"])
 #reference_time = pd.Timestamp('2024-05-21 00:00:00')
 
