@@ -1,0 +1,2 @@
+﻿Brand,Model,Year,Type,CapacityPax,batteryCap,SoC,acON,consAC,consNoAC,speedfacts,odo,maxChargeDay,maxChargeNight,minSoC,battDeg
+SUNWIN,EVB8M,2023,Buseton,50,250,95%,FALSE,0.8,0.7,"[0.9, 1, 1.1]",0,70%,95%,10%,0%
