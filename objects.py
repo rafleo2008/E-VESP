@@ -7,6 +7,7 @@ Created on Thu Mar 23 19:42:01 2023
 ## Main modules
 
 from datetime import timedelta
+import pandas as pd
 ## Objects definition
 
 ## ebus
@@ -18,32 +19,71 @@ class eBus:
     fleet = []
     
     def __init__(self, 
+                 
+                 # General vehicle parameters
+                 
                  brand: str,            # Bus Brand
                  model: str,            # Bus model
-                 year: int, #Delete?    # Bus year
+                 year: int,             # Bus year
+                 busType: str,          # Bus size (meters)
                  capacity: float,       # Bus Capacity (seated +stand)
+                 busId: float,          # Bus Id defined
+                 busDepot: str,         # Starting bus depot
+                 
+                 # Battery parameters
+                 
+                 capKwh: float,         # Battery capacity in Kilowatts hour 
+                 soc: float,            # SoC in kWh
+                 #socpe: float,          # Soc in percentage                 
+                 
+                 # Consumption parameters
+                 
                  acON: bool,            # Bool (is using AC?)
                  consAC: float,         # Reference consumption using AC
                  consNoAC: float,       # Reference consumption not using AC
-                 soc: float,            # SoC in kWh
-                 socpe: float,          # Soc in percentage
+                 speedFact: list,        # Consumption speed modifier based on graphics
+                 
+                 #Basic operation 
+                 
                  odo: float,            # Odometer
-                 busId: str             # Bus ID to identify vehicle in simulation
+                 maxChargeDay: float,    # Max percentage of battery in day
+                 maxChargeNight: float,  # Max percentage of battery in night
+                 minCharge: float,       # Min percentage of battery allowed
+                 battDeg: float         # Percentage of battery degradation
+                 
                  ):
+        # Example
+        '''
         
+        bus1 = eBus('Sunwin','EVB8m',2023,250,True, 0.9,0.75, 1,1,0, "Bus1")
+        
+        '''
         ## Assign self initial parameters
         
         self.brand = brand
         self.model = model
         self.year = year
+        self.busType = busType
         self.capacity = capacity
+        self.busId = busId
+        self.busDepot = busDepot
+        
+        self.capKwh = capKwh
+        self.soc = soc
+        
         self.ac = acON
         self.consAC = consAC
         self.consNoAC = consNoAC
-        self.soc = capacity
-        self.socpe = socpe
+        self.speedFact = speedFact
+
         self.odo = odo
-        self.busId = busId
+        self.maxChargeDay = maxChargeDay
+        self.maxChargeNight = maxChargeNight
+        self.minCharge = minCharge
+        self.battDeg = battDeg
+        
+        # Default parameters
+        
         self.routePosit = 0
         self.tripscounter = 0
         self.routeLengt = 999999
@@ -269,12 +309,45 @@ class Charger:
 
 # Bus Object example
 
+## Example from environment bus
+
+busRepo = pd.read_csv('Environment/Ebus_specifications.csv')
+
+busModel1 = busRepo.iloc[0]
+
+fleetExample = []
+
+fleetNames = ['Bus1', 'Bus2', 'Bus3', 'Bus4','Bus5']
+
+for bus in fleetNames:
+    bus = eBus(busModel1.Brand,
+               busModel1.Model,
+               busModel1.Year,
+               busModel1.Type,
+               busModel1.CapacityPax,
+               bus,
+               "South",
+               busModel1.batteryCap,
+               busModel1.SoC,
+               busModel1.acON,
+               busModel1.consAC,
+               busModel1.consNoAC,
+               busModel1.speedfacts,
+               busModel1.odo,
+               busModel1.maxChargeDay,
+               busModel1.maxChargeNight,
+               busModel1.minSoC,
+               busModel1.battDeg
+               )
+    fleetExample.append(bus)
 
 
+
+'''
 bus1 = eBus('Sunwin','EVB8m',2023,250,True, 0.9,0.75, 1,1,0, "Bus1")
 bus2 = eBus('Yutong','EVB8m',2023,250,True, 0.9,0.75, 1,1,0, "Bus2")
 bus3 = eBus('Zhongtong','EVB8m',2023,250,True, 0.9,0.75, 1,1,0, "Bus3")
-
+'''
 for item in eBus.fleet:
     item.assignStatus("Parked")
     
