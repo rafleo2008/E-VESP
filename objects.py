@@ -133,8 +133,8 @@ class eBus:
         
     def runStep(self, step, speed, simStep):
        
-        currentStatus = self.status
-        energy = step*speed
+        #currentStatus = self.status
+        #energy = step*speed
         #print(energy)
                               
         '''
