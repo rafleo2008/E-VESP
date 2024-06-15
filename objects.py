@@ -77,6 +77,8 @@ class eBus:
         self.speedFact = speedFact
 
         self.odo = odo
+        self.emptyOdo = 0
+        self.routeOdo = 0
         self.maxChargeDay = maxChargeDay
         self.maxChargeNight = maxChargeNight
         self.minCharge = minCharge
@@ -92,27 +94,36 @@ class eBus:
         
     
     def setInitialBattery(self,charge):
-        self.soc = min(self.capacity, (charge*self.soc))
-        self.socpe = self.soc/self.capacity
-        print("The battery has been defined as {} kWh, {} % of the battery".format(str(self.soc),
+        # Define battery based on degradation
+        self.capKwh = self.capKwh*(1-self.battDeg)
+        print("Max capacity of a degraded battery set in "+ str(self.capKwh))
+        self.batEneKwh = min(self.capKwh, charge) 
+        self.soc = self.batEneKwh/self.capKwh
+        self.socpe = self.batEneKwh/self.capKwh*100
+        
+        print("The battery has been defined as {} kWh, {} % of the battery".format(str(self.batEneKwh),
                                                                                    str(self.socpe)))             
 
     def assignStatus(self, status):
         self.status = status
     def restartRoutePosit (self):
         self.routePosit = 0
-    def innitializeRoute(self):
+    def innitializeRoute(self, routeName, routeLen, routeSpeed, emptyLengt):
         ## Prueba con ruta standar
+        '''
         freq = 5 # 5 minutos
         routeLen = 22
         routeSpe = 17
         cycleTime = (routeLen/routeSpe)*60
         routeName = "Imaginary route"
+        '''
+        ##
         self.routeName = routeName
         self.routeLengt = routeLen 
         self.routePosit = 0
-        self.routeSpeed = routeSpe
-        self.emptyLengt = 5 
+        self.routeSpeed = routeSpeed
+        self.emptyLengt = emptyLengt
+        
         
     def setBusId (self, identifier):
         self.identifier = identifier
@@ -341,8 +352,10 @@ for bus in fleetNames:
                )
     fleetExample.append(bus)
 
-
-
+for i in range(0,len(fleetExample)):
+    fleetExample[i].setInitialBattery(190)
+    fleetExample[i].innitializeRoute('TestRoute', 35, 13, 7)
+    
 '''
 bus1 = eBus('Sunwin','EVB8m',2023,250,True, 0.9,0.75, 1,1,0, "Bus1")
 bus2 = eBus('Yutong','EVB8m',2023,250,True, 0.9,0.75, 1,1,0, "Bus2")
@@ -354,7 +367,7 @@ for item in eBus.fleet:
 for item in eBus.fleet:
     item.printStatus()
 
-
+print(fleetExample[0].soc)
 #bus1.assignStatus("In route")
 #bus1.runStep(1, 30)
 
