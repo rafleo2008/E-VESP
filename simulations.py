@@ -108,7 +108,8 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                 log = printAndCompileMsg(str(simStep)+ "," + 
                                          bus.busId + ", Estado :"+
                                          bus.status + ", SoC: " +
-                                         str(bus.soc) + ", Odometer: " +
+                                         str(bus.soc) + ",Battery kWh: " +
+                                         str(bus.batEneKwh) + ", Odometer"+
                                          str(bus.odo) + ", routepos: " +
                                          str(bus.routePosit) + ",No trips: "+
                                          str(bus.tripscounter)+ ",Route len: "+
@@ -119,6 +120,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                                    bus.busId,
                                    bus.status,
                                    bus.soc,
+                                   bus.batEneKwh,
                                    bus.odo,
                                    bus.routePosit,
                                    bus.tripscounter])
@@ -138,7 +140,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
         
         for bus in fleet:
             # Check if bus is available at depot
-            if bus.status == 'Parked' and bus.soc >= (250*.1)+(22*.9):
+            if bus.status == 'Parked' and bus.batEneKwh >= (bus.capKwh *0.7):   # If battery above 70% mark as available
                 availableInDepot.append(fleetCount)
                 #print(str(len(availableInDepot))  +'veh en el patio')
                 
@@ -147,7 +149,9 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                 availableInPIR.append(fleetCount)
                 #print(str(len(availableInPIR))  +'veh en el PIR')
             # Check wich buses will be availabe at future dep Time
-            elif (bus.status == 'InRoute' and (bus.routeLengt - bus.routePosit <= 0.5) and bus.soc >= (250*.1)+(27*.9)):
+            elif (bus.status == 'InRoute' 
+                  and (bus.routeLengt - bus.routePosit <= 0.5) 
+                  and (bus.batEneKwh >= (bus.capKwh*0.1 + 20))):
                 toBeAvailableinPIR.append(fleetCount)
             
                 #print(str(len(toBeAvailableinPIR))  +'A LEGAR AL PIR')
@@ -172,26 +176,28 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
         
         if myTimeTable.shape[0] > row:
             
-            depBusdep = myTimeTable.iloc[rowA]
-            departure = myTimeTable.iloc[row]
-        
-            # Dispatch to PIR
-            if(simStep == (round(depBusdep.TimeStep,0) - timeToPir - 1)):
-                # Check if there is any vehicle to arrive at PIR
-                if len(toBeAvailableinPIR) == 0:
-                    print("At "+ str(simStep) +", send a bus to InRoute"+ fleet[availableInDepot[0]].busId)
-                    fleet[availableInDepot[0]].innitializeRoute()
-                    fleet[availableInDepot[0]].assignStatus("InTransit")
-                    rowA = rowA + 1
-
+            if myTimeTable.shape[0] > rowA:
             
+                depBusdep = myTimeTable.iloc[rowA]
+                      
+                # Dispatch to PIR
+                if(simStep == (round(depBusdep.TimeStep,0) - timeToPir - 1)):
+                    # Check if there is any vehicle to arrive at PIR
+                    if len(toBeAvailableinPIR) == 0:
+                        print("At "+ str(simStep) +", send a bus to InRoute"+ fleet[availableInDepot[0]].busId)
+                        fleet[availableInDepot[0]].innitializeRoute('Route A', 30, 15, 1)
+                        fleet[availableInDepot[0]].assignStatus("InTransit")
+                        rowA = rowA + 1
+
+            departure = myTimeTable.iloc[row]            
+
             # Dispatch in PIR
             
             if(simStep == departure.TimeStep):  #Fleet assignment
                 print("Departure simstep " + str(simStep))
                 print("Hay " +str(len(availableInPIR))+" buses disponibles")
                 fleet[availableInPIR[0]].assignStatus("InRoute")
-                fleet[availableInPIR[0]].innitializeRoute()
+                fleet[availableInPIR[0]].innitializeRoute('Route A', 30, 15, 1)
                 print("Bus no "+ fleet[availableInPIR[0]].busId +" ha inicado ruta en el simStep" + str(simStep))
                 row = row + 1
 
@@ -200,9 +206,11 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
         # Send parked and discharged buses to charge
         busCount = 0
         for bus in fleet:
-            if bus.status == "Parked" and bus.soc <= (250*.1)+(22*.9):
+            if bus.status == "Parked" and bus.batEneKwh <= (bus.capKwh *0.3):     # Charge if battery is below 30% of 
+                
                 fleet[busCount].assignStatus("Charging")
                 fleet[busCount].restartRoutePosit()
+                
             if bus.status == "Parked" and myTimeTable.shape[0] <= row:
                 fleet[busCount].assignStatus("Charging")
                 fleet[busCount].restartRoutePosit()
@@ -295,6 +303,7 @@ busResultsHeaders = ['TimeStep',
                     'Bus_Id',
                     'Status',
                     'SoC',
+                    'Battery energy (kWh)',
                     'Odometer',
                     'Route_Position',
                     'Trips_Completed'
@@ -321,7 +330,7 @@ busRepo = pd.read_csv('Environment/Ebus_specifications.csv')
 
 busModel1 = busRepo.iloc[0]
 
-n = 16 # further input variable, further development will include validation
+n = 31 # further input variable, further development will include validation
 
 fleet = []
 
@@ -350,8 +359,11 @@ for i in range(n):
                )
     
     fleet.append(bus)
+    fleet[i].setInitialBattery(250)
 
 log = printAndCompileMsg("Created vehicles in fleet", log)
+## Set innitial battery
+
 
 ## Open timetable
 
