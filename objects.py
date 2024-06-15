@@ -109,15 +109,7 @@ class eBus:
     def restartRoutePosit (self):
         self.routePosit = 0
     def innitializeRoute(self, routeName, routeLen, routeSpeed, emptyLengt):
-        ## Prueba con ruta standar
-        '''
-        freq = 5 # 5 minutos
-        routeLen = 22
-        routeSpe = 17
-        cycleTime = (routeLen/routeSpe)*60
-        routeName = "Imaginary route"
-        '''
-        ##
+        
         self.routeName = routeName
         self.routeLengt = routeLen 
         self.routePosit = 0
@@ -155,8 +147,13 @@ class eBus:
         if (self.status == "InTransit"):
             ## Move the bus around the emtpy length
             ## Once the empty lenght has been reached, it pass to InRoute
-            self.odo = self.odo + self.routeSpeed*(step/60)
+            
+            
+            self.odo = self.odo + self.routeSpeed*(step/60) 
             self.routePosit = min(self.routePosit + self.routeSpeed*(step/60), self.emptyLengt)
+            self.batEneKwh = self.batEneKwh - (self.routeSpeed*(step/60) * self.consAC) # Testing with static ac use, change to general consumption in the future
+            self.soc = self.batEneKwh/self.capKwh
+            
             if (self.routePosit == self.emptyLengt):
                 self.status = "AvailableInPIR"
                 self.routePosit = 0
@@ -169,7 +166,10 @@ class eBus:
             # Update position
             # Stop if SoC <+ 10%
             #print(self.busId + self.status)
-            self.soc = self.soc - (self.routeSpeed*(step/60))*self.consAC
+            self.batEneKwh = self.batEneKwh - (self.routeSpeed*(step/60) * self.consAC) # Testing with static ac use, change to general consumption in the future
+            self.soc = self.batEneKwh/self.capKwh
+            
+            
             self.odo = self.odo + self.routeSpeed*(step/60)
             # Update route
             self.routePosit = min(self.routePosit + self.routeSpeed*(step/60), self.routeLengt)
@@ -180,7 +180,7 @@ class eBus:
                 self.routePosit = 0
                 self.tripscounter = self.tripscounter + 1
                 
-                if(self.soc > (250*.1)+(22*.9)):
+                if(self.batEneKwh > (250*.1)+(22*.9)):
                     self.status = "AvailableInPIR"
                 else:
                     self.status = 'ReturnToDepot'
@@ -189,7 +189,8 @@ class eBus:
         ### If returning to Depot, discharge and count
         
         if (self.status == 'ReturnToDepot'):
-            self.soc = self.soc - (self.routeSpeed*(step/60))*self.consAC
+            self.batEneKwh = self.batEneKwh - (self.routeSpeed*(step/60) * self.consAC) # Testing with static ac use, change to general consumption in the future
+            self.soc = self.batEneKwh/self.capKwh
             self.odo = self.odo + self.routeSpeed*(step/60)
             self.routePosit = min(self.routePosit + self.routeSpeed*(step/60), self.emptyLengt)
             if (self.routePosit == self.emptyLengt):
@@ -208,11 +209,17 @@ class eBus:
             
 
         elif(self.status == "Charging"):
-            maxCharge = self.capacity
-            charge = self.soc + (120*(step/60)) ##120kwh power, change to a variable soon (from charger)
+            maxCharge = self.capKwh
             
-            self.soc = min(maxCharge, charge)
-            if (self.soc == maxCharge):
+            
+            #self.batEneKwh = self.batEneKwh  (self.routeSpeed*(step/60) * self.consAC) # Testing with static ac use, change to general consumption in the future
+            
+            
+            charge = self.batEneKwh + (120*(step/60)) ##120kwh power, change to a variable soon (from charger)
+            self.soc = self.batEneKwh/self.capKwh
+            
+            self.batEneKwh = min(maxCharge, charge)
+            if (self.batEneKwh  == maxCharge):
                 self.status = "Parked"
                 self.routePosit = 0
                 
