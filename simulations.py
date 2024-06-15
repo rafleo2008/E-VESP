@@ -317,6 +317,10 @@ SouthPIR = o.PIR("South", "A1", "Depot1")
 
 ## 04.1.2. Bus fleet definition
 
+busRepo = pd.read_csv('Environment/Ebus_specifications.csv')
+
+busModel1 = busRepo.iloc[0]
+
 n = 16 # further input variable, further development will include validation
 
 fleet = []
@@ -325,17 +329,25 @@ for i in range(n):
     busId = f"Ebus_E{i:02d}"
     log = printAndCompileMsg("Creando bus " + busId, log)
     
-    bus = o.eBus('Sunwin', 
-                 'EVB8m',
-                 2023,
-                 250,
-                 True, 
-                 0.9,
-                 0.75, 
-                 1, 
-                 0.85, 
-                 0,
-                 busId)
+    bus = o.eBus(busModel1.Brand,
+               busModel1.Model,
+               busModel1.Year,
+               busModel1.Type,
+               busModel1.CapacityPax,
+               busId,
+               "South",
+               busModel1.batteryCap,
+               busModel1.SoC,
+               busModel1.acON,
+               busModel1.consAC,
+               busModel1.consNoAC,
+               busModel1.speedfacts,
+               busModel1.odo,
+               busModel1.maxChargeDay,
+               busModel1.maxChargeNight,
+               busModel1.minSoC,
+               busModel1.battDeg
+               )
     
     fleet.append(bus)
 
