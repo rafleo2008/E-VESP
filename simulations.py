@@ -73,6 +73,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
     row = 0
     rowA = 0
     i = 0
+    routeData = ['Route E_2', 21.1, 18, 2]
     #minuteStep = simResolution.total_seconds()/60
     
     ## 02. Initialize vehicles, PIR and controllers
@@ -91,7 +92,11 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
         
         ## Identify need in advance of busses
         
+        
+        ## Fix and get from route
         timeToPir = math.ceil((5/17)*60) # time from bus depot to PIR in minutes
+        
+        timeToPir = math.ceil((routeData[3]/routeData[2])*60)
         
         ## 01. Check for need to departure busses from bus depot to PIR
         
@@ -150,7 +155,7 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                 #print(str(len(availableInPIR))  +'veh en el PIR')
             # Check wich buses will be availabe at future dep Time
             elif (bus.status == 'InRoute' 
-                  and (bus.routeLengt - bus.routePosit <= 0.5) 
+                  and (bus.routeLengt - bus.routePosit <= routeData[3]) 
                   and (bus.batEneKwh >= (bus.capKwh*0.1 + 20))):
                 toBeAvailableinPIR.append(fleetCount)
             
@@ -181,11 +186,12 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                 depBusdep = myTimeTable.iloc[rowA]
                       
                 # Dispatch to PIR
-                if(simStep == (round(depBusdep.TimeStep,0) - timeToPir - 1)):
+                if(simStep == (round(depBusdep.TimeStep,0) - timeToPir - 2)):
                     # Check if there is any vehicle to arrive at PIR
                     if len(toBeAvailableinPIR) == 0:
                         print("At "+ str(simStep) +", send a bus to InRoute"+ fleet[availableInDepot[0]].busId)
-                        fleet[availableInDepot[0]].innitializeRoute('Route A', 30, 15, 1)
+                        ## Repeated action with same parameters, fix
+                        fleet[availableInDepot[0]].innitializeRoute('Route E_2', 21.1, 18, 2)
                         fleet[availableInDepot[0]].assignStatus("InTransit")
                         rowA = rowA + 1
 
@@ -197,7 +203,8 @@ def runModel(startTime, endTime, simResolution, reportFreq, fleet, myTimeTable, 
                 print("Departure simstep " + str(simStep))
                 print("Hay " +str(len(availableInPIR))+" buses disponibles")
                 fleet[availableInPIR[0]].assignStatus("InRoute")
-                fleet[availableInPIR[0]].innitializeRoute('Route A', 30, 15, 1)
+                ## Repeated action with same parameters, fix
+                fleet[availableInPIR[0]].innitializeRoute('Route E_2', 21.1, 18, 2)
                 print("Bus no "+ fleet[availableInPIR[0]].busId +" ha inicado ruta en el simStep" + str(simStep))
                 row = row + 1
 
@@ -257,7 +264,7 @@ def writeMessages(log):
                
 ## Import main libraries
 
-import main as m
+#import main as m
 import time
 from datetime import datetime
 
@@ -269,8 +276,9 @@ from pathlib import Path
 
 
 ## General preparation codes
+
 ## Open timetables
-timeTablesPath = Path("Intermediate/timetables.csv")
+timeTablesPath = Path("Intermediate/timetables_ejemplo_monteria.csv")
 
 compiledTimeTable = pd.read_csv(timeTablesPath)
 
@@ -330,7 +338,7 @@ busRepo = pd.read_csv('Environment/Ebus_specifications.csv')
 
 busModel1 = busRepo.iloc[0]
 
-n = 31 # further input variable, further development will include validation
+n = 13 # further input variable, further development will include validation
 
 fleet = []
 
@@ -401,5 +409,5 @@ runModel(start_min_step, end_min_step, min_time_step, 1, fleet, myTimeTable, log
 writeMessages(log)
 
 busResultsDF = pd.DataFrame(data = busResults, columns = busResultsHeaders)
-busResultsDF.to_csv("BUs_results.csv")
+busResultsDF.to_csv("Bus_results.csv")
 log = printAndCompileMsg("Run finalized correctly", log)
