@@ -2,7 +2,9 @@
 .ipynb_checkpoints/Timetables-checkpoint.ipynb
 Inputs/Frequencies.xlsx
 __pycache__/main.cpython-39.pyc
-__pycache__/objects.cpython-39.pyc
+__pycache__/
 Intermediate/timetables.csv
 Example.html
 Example2.html
+
+logfile.txt
